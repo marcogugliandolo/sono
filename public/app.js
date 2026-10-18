@@ -365,30 +365,57 @@
     var v = texto(valor);
     if (v) dd.textContent = v; else dd.appendChild(pendiente());
   }
+  /* Redes sociales: Instagram, Pinterest y WhatsApp, con sus iconos */
+  function enlacesRedes(d) {
+    var lista = [];
+    var ig = texto(d.instagram).replace(/^@/, '');
+    if (ig) lista.push({ id: 'instagram', nombre: 'Instagram', texto: '@' + ig, url: 'https://www.instagram.com/' + encodeURIComponent(ig) + '/' });
+    var pin = texto(d.pinterest).replace(/^@/, '');
+    if (pin) lista.push({ id: 'pinterest', nombre: 'Pinterest', texto: '@' + pin, url: 'https://www.pinterest.es/' + encodeURIComponent(pin) + '/' });
+    var wa = texto(d.whatsapp).replace(/[^\d]/g, '');
+    if (wa.length === 9) wa = '34' + wa;   // número español sin prefijo
+    if (wa.length >= 9) lista.push({ id: 'whatsapp', nombre: 'WhatsApp', texto: texto(d.whatsapp), url: 'https://wa.me/' + wa });
+    return lista;
+  }
+  function enlaceRed(red) {
+    var a = el('a', 'enlace-red');
+    a.href = red.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.setAttribute('aria-label', red.nombre + ' de SOÑO');
+    a.title = red.nombre;
+    var icono = el('span', 'icono-red icono-red--' + red.id);
+    icono.setAttribute('aria-hidden', 'true');
+    a.appendChild(icono);
+    return a;
+  }
+
   function pintarDatos() {
     var d = estado.datos || {};
     ponerDato('dato-direccion', d.direccion);
     ponerDato('dato-email', d.email);
     ponerDato('dato-telefono', d.telefono);
     var ig = texto(d.instagram).replace(/^@/, '');
+    var redes = enlacesRedes(d);
+    // Pie de la galería: solo Instagram, con su usuario
     document.querySelectorAll('.dato-instagram').forEach(function (n) {
       n.innerHTML = '';
-      var icono = svgUso('camara');
-      icono.setAttribute('class', 'icono-red');
-      if (ig) {
-        var a = el('a', 'enlace-red');
-        a.href = 'https://www.instagram.com/' + encodeURIComponent(ig) + '/';
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.setAttribute('aria-label', 'Instagram de SOÑO: @' + ig);
-        a.appendChild(icono);
-        a.appendChild(el('span', null, '@' + ig));
+      var red = redes.filter(function (x) { return x.id === 'instagram'; })[0];
+      if (red) {
+        var a = enlaceRed(red);
+        a.appendChild(el('span', null, red.texto));
         n.appendChild(a);
       } else {
-        n.appendChild(icono);
         n.appendChild(pendiente('Instagram por confirmar'));
       }
     });
+    // «Síguenos»: un icono por cada red que tenga datos en el panel
+    var pie = $('redes-pie');
+    if (pie) {
+      pie.innerHTML = '';
+      if (!redes.length) pie.appendChild(pendiente('Redes por confirmar'));
+      redes.forEach(function (red) { pie.appendChild(enlaceRed(red)); });
+    }
     $('pegatina').hidden = d.abrimosPronto === false;
     var hayLlevar = d.paraLlevar !== false;
     var hayDomicilio = d.domicilio !== false;
@@ -828,7 +855,7 @@
     if (k === 'carta') return { categorias: [], productos: [] };
     if (k === 'galeria') return { fotos: PIES_GALERIA.map(function (pie, i) { return { id: 'g' + (i + 1), pie: pie, foto: null }; }) };
     if (k === 'horario') return { dias: DIAS_SEMANA.map(function (dia) { return { dia: dia, texto: '' }; }), manana: [], tarde: [] };
-    return { direccion: '', email: '', telefono: '', instagram: '', abrimosPronto: true, paraLlevar: true, domicilio: true };
+    return { direccion: '', email: '', telefono: '', instagram: '', pinterest: '', whatsapp: '', abrimosPronto: true, paraLlevar: true, domicilio: true };
   }
   function normalizar(k, b) {
     if (k === 'carta' && !Array.isArray(b.productos)) b.productos = [];
@@ -1224,6 +1251,8 @@
     campos.appendChild(campoTexto('adm-email', 'Email', b.email, function (v) { b.email = v; }, { inputmode: 'email', autocomplete: 'off' }));
     campos.appendChild(campoTexto('adm-telefono', 'Teléfono', b.telefono, function (v) { b.telefono = v; }, { inputmode: 'tel', autocomplete: 'off' }));
     campos.appendChild(campoTexto('adm-instagram', 'Instagram', b.instagram, function (v) { b.instagram = v; }, { placeholder: 'usuario', autocomplete: 'off' }));
+    campos.appendChild(campoTexto('adm-pinterest', 'Pinterest', b.pinterest, function (v) { b.pinterest = v; }, { placeholder: 'usuario', autocomplete: 'off' }));
+    campos.appendChild(campoTexto('adm-whatsapp', 'WhatsApp', b.whatsapp, function (v) { b.whatsapp = v; }, { placeholder: '600 123 456', inputmode: 'tel', autocomplete: 'off' }));
 
     var casilla = el('label', 'casilla');
     var check = el('input'); check.type = 'checkbox'; check.id = 'adm-abrimos'; check.checked = b.abrimosPronto !== false;

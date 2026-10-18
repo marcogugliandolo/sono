@@ -190,7 +190,7 @@ input:focus-visible + label.boton { outline: 3px solid var(--acento); outline-of
   font-size: var(--t-s);
 }
 .menu a { text-decoration: none; padding-block: 4px; border-bottom: 2px solid transparent; }
-.menu a:hover { border-bottom-color: currentColor; }
+
 
 /* Portada */
 .portada { padding-top: 0; }
@@ -1228,7 +1228,28 @@ input:focus-visible + .alergeno-chip { outline: 3px solid var(--acento); outline
 .modal--admin .campo select:focus-visible,
 .modal--admin .admin__dia input:focus-visible { outline: 3px solid #562912; outline-offset: 2px; border-color: #562912; }
 
-/* Redes sociales: icono de línea, como el resto de dibujos, y el usuario al lado */
+/* Redes sociales: iconos en el color del texto (máscaras de /img/red-*.png) */
 .dato-instagram { display: inline-flex; align-items: center; gap: 8px; }
-.enlace-red { display: inline-flex; align-items: center; gap: 8px; }
-.icono-red { width: 26px; height: 26px; flex: none; --grosor: 2.4; overflow: visible; }
+.redes { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.enlace-red { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; transition: transform 0.2s ease, opacity 0.2s ease; }
+.enlace-red:hover { opacity: 0.75; }
+@media (prefers-reduced-motion: no-preference) {
+  .enlace-red:hover { transform: translateY(-2px); }
+}
+.icono-red {
+  display: block;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  background: currentColor;
+  -webkit-mask: var(--icono) center / contain no-repeat;
+  mask: var(--icono) center / contain no-repeat;
+}
+.dato-instagram .icono-red { width: 28px; height: 28px; }
+.icono-red--instagram { --icono: url("/img/red-instagram.png"); }
+.icono-red--pinterest { --icono: url("/img/red-pinterest.png"); }
+.icono-red--whatsapp { --icono: url("/img/red-whatsapp.png"); }
+
+/* Enlaces sin subrayar */
+a { text-decoration: none; }
+a:not(.boton):not(.enlace-red):hover { opacity: 0.75; }
