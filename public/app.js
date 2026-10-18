@@ -182,6 +182,40 @@
     });
   });
 
+  /* ---------- Barra del menú fija ---------- */
+  var barra = $('barra');
+  function medirBarra() { raiz.style.setProperty('--alto-barra', barra.offsetHeight + 'px'); }
+  function marcarBarra() {
+    var antes = barra.classList.contains('desplazada');
+    var ahora = window.scrollY > 8;
+    if (antes !== ahora) { barra.classList.toggle('desplazada', ahora); setTimeout(medirBarra, 300); }
+  }
+  window.addEventListener('scroll', marcarBarra, { passive: true });
+  window.addEventListener('resize', medirBarra);
+  marcarBarra();
+  medirBarra();
+  // Marca en el menú la sección que se está viendo
+  if ('IntersectionObserver' in window) {
+    var enlacesMenu = Array.prototype.slice.call(document.querySelectorAll('.menu a[href^="#"]'));
+    var observador = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        enlacesMenu.forEach(function (a) { a.classList.toggle('activo', a.getAttribute('href') === '#' + e.target.id); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    enlacesMenu.forEach(function (a) {
+      var sec = document.getElementById(a.getAttribute('href').slice(1));
+      if (sec) observador.observe(sec);
+    });
+    // En la portada no se marca ninguna
+    var portada = document.querySelector('.portada');
+    if (portada) {
+      new IntersectionObserver(function (entradas) {
+        if (entradas[0].isIntersecting) enlacesMenu.forEach(function (a) { a.classList.remove('activo'); });
+      }, { rootMargin: '-45% 0px -50% 0px' }).observe(portada);
+    }
+  }
+
   var modalReserva = $('modal-reserva');
   var modalProducto = $('modal-producto');
   var modalLogin = $('modal-login');
