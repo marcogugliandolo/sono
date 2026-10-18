@@ -30,6 +30,7 @@ img { max-width: 100%; }
 /* Layout: bandas a todo el ancho que alternan amarillo y marrón (como la plantilla), contenido en una columna de 1180px; reservas, productos y panel de administración en ventanas emergentes */
 :root {
   --amarillo: #EAE52B;
+  --fondo: #FFFDB3;
   --amarillo-palido: #F5F2B8;
   --cafe: #3A2808;
   --cafe-claro: #4C3713;
@@ -79,7 +80,7 @@ a { color: inherit; }
 }
 
 .banda { padding-block: clamp(64px, 9vw, 120px); }
-.banda--amarillo { background: var(--amarillo); color: var(--cafe); }
+.banda--amarillo { background: var(--fondo); color: var(--cafe); }
 .banda--cafe { background: var(--cafe); color: var(--amarillo-palido); }
 section[id] { scroll-margin-top: 16px; }
 
@@ -688,7 +689,7 @@ input:focus-visible + .chip { outline: 3px solid var(--amarillo); outline-offset
 .producto .modal__cerrar { position: absolute; top: 16px; right: 16px; z-index: 3; }
 .producto__visual {
   position: relative;
-  background: var(--amarillo);
+  background: var(--fondo);
   color: var(--cafe);
   display: grid;
   place-items: center;
@@ -898,7 +899,7 @@ input:focus-visible + .chip { outline: 3px solid var(--amarillo); outline-offset
 /* Pie */
 .pie { padding-block: clamp(24px, 4vw, 40px); }
 .pie__bloque {
-  background: var(--amarillo);
+  background: var(--fondo);
   color: var(--cafe);
   border-radius: var(--radio);
   padding: clamp(28px, 5vw, 56px);
