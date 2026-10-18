@@ -107,6 +107,10 @@ Fredoka, la misma letra redondeada del logo, alojada en `public/fuentes` con su 
 
 El icono de la pestaña (`favicon.ico`, `favicon.svg` y `apple-touch-icon.png`) es el logo.
 
+## Zonas del local
+
+Al reservar mesa se puede elegir zona en un mini plano: interior, zona de lectura, terraza o «donde haya sitio». En **Ajustes → Zonas para reservar** se renombran, se añaden (hasta 6, con dibujo de mesas, terraza, lectura o barra) y se desactivan. La zona elegida aparece en cada reserva del panel.
+
 ## Horas de recogida
 
 Los pedidos para recoger se pueden programar para hoy, mañana o pasado mañana, en las mismas horas que las reservas (pestaña **Horarios** del panel). Si no hay horas puestas, el pedido se envía sin hora y se acuerda por teléfono.

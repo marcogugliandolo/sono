@@ -27,6 +27,10 @@
       <circle class="trazo" cx="50" cy="50" r="17"/>
       <path class="trazo" d="M50 13 V24 M50 76 V87 M13 50 H24 M76 50 H87 M23.8 23.8 L31.6 31.6 M68.4 68.4 L76.2 76.2 M23.8 76.2 L31.6 68.4 M68.4 31.6 L76.2 23.8"/>
     </symbol>
+    <symbol id="i-zona-mesas" viewBox="0 0 120 60"><circle class="trazo" cx="18" cy="32" r="8"/><circle class="trazo" cx="5" cy="32" r="3.2"/><circle class="trazo" cx="31" cy="32" r="3.2"/><circle class="trazo" cx="18" cy="18" r="3.2"/><circle class="trazo" cx="18" cy="46" r="3.2"/><circle class="trazo" cx="60" cy="32" r="8"/><circle class="trazo" cx="47" cy="32" r="3.2"/><circle class="trazo" cx="73" cy="32" r="3.2"/><circle class="trazo" cx="60" cy="18" r="3.2"/><circle class="trazo" cx="60" cy="46" r="3.2"/><circle class="trazo" cx="102" cy="32" r="8"/><circle class="trazo" cx="89" cy="32" r="3.2"/><circle class="trazo" cx="115" cy="32" r="3.2"/><circle class="trazo" cx="102" cy="18" r="3.2"/><circle class="trazo" cx="102" cy="46" r="3.2"/></symbol>
+    <symbol id="i-zona-terraza" viewBox="0 0 120 60"><circle class="trazo" cx="32" cy="30" r="15"/><path class="trazo" d="M32 15 V45 M17 30 H47 M21.4 19.4 L42.6 40.6 M21.4 40.6 L42.6 19.4"/><circle class="trazo" cx="10" cy="30" r="3.5"/><circle class="trazo" cx="54" cy="30" r="3.5"/><circle class="trazo" cx="88" cy="30" r="15"/><path class="trazo" d="M88 15 V45 M73 30 H103 M77.4 19.4 L98.6 40.6 M77.4 40.6 L98.6 19.4"/><circle class="trazo" cx="66" cy="30" r="3.5"/><circle class="trazo" cx="110" cy="30" r="3.5"/></symbol>
+    <symbol id="i-zona-lectura" viewBox="0 0 120 60"><path class="trazo" d="M8 8 H112 V18 H8 Z M20 8 V18 M30 8 V18 M38 8 V18 M52 8 V18 M60 8 V18 M74 8 V18 M84 8 V18 M98 8 V18"/><path class="trazo" d="M24 30 H50 V52 H24 Z M24 30 V52 M28 30 V36 H46 V30"/><path class="trazo" d="M70 30 H96 V52 H70 Z M74 30 V36 H92 V30"/><circle class="trazo" cx="60" cy="44" r="5"/></symbol>
+    <symbol id="i-zona-barra" viewBox="0 0 120 60"><path class="trazo" d="M8 10 H112 V22 H8 Z"/><circle class="trazo" cx="22" cy="38" r="5"/><circle class="trazo" cx="42" cy="38" r="5"/><circle class="trazo" cx="62" cy="38" r="5"/><circle class="trazo" cx="82" cy="38" r="5"/><circle class="trazo" cx="102" cy="38" r="5"/></symbol>
     <symbol id="i-estrella" viewBox="0 0 20 20">
       <path class="trazo" d="M10 1 L12.4 7.6 L19 10 L12.4 12.4 L10 19 L7.6 12.4 L1 10 L7.6 7.6 Z"/>
     </symbol>
@@ -450,6 +454,12 @@
             <button class="paso" type="button" id="mas" aria-label="Una persona más">+</button>
             <span class="ayuda">Máximo 8 por reserva</span>
           </div>
+        </fieldset>
+
+        <fieldset id="campo-zona">
+          <legend>Zona</legend>
+          <p class="reserva__grupo-horas">Toca en el plano dónde te gustaría sentarte.</p>
+          <div class="plano" id="plano-zonas"></div>
         </fieldset>
 
         <fieldset>

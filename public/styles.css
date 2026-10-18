@@ -1260,3 +1260,66 @@ input:focus-visible + .alergeno-chip { outline: 3px solid var(--acento); outline
 /* Enlaces sin subrayar */
 a { text-decoration: none; }
 a:not(.boton):not(.enlace-red):hover { opacity: 0.75; }
+
+/* Mini plano de zonas en la reserva */
+.plano { display: grid; gap: 10px; }
+.plano__cualquiera { display: flex; }
+.chip--zona { padding: 10px 16px; font-weight: 700; }
+.plano__local {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;                                   /* los huecos hacen de tabiques */
+  background: var(--linea-sobre-cafe);
+  border: 3px solid var(--amarillo-palido);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.plano__entrada { justify-self: center; margin-top: -4px; font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.plano__fuera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border: 2px dashed var(--linea-sobre-cafe);
+  border-radius: 18px;
+}
+.zona {
+  flex: 1 1 150px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  min-height: 108px;
+  padding: 14px 10px 12px;
+  background: var(--cafe);
+  color: var(--amarillo-palido);
+  font-weight: 700;
+  font-size: var(--t-s);
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.plano__fuera .zona { border-radius: 12px; }
+.zona svg { width: 100%; max-width: 132px; height: 56px; --grosor: 2; overflow: visible; }
+.zona:hover { background: var(--cafe-claro); }
+input:checked + .zona { background: var(--acento); color: var(--cafe); }
+input:focus-visible + .zona { outline: 3px solid var(--acento); outline-offset: -6px; }
+
+/* Zonas en el panel */
+.zonas-admin { display: grid; gap: 10px; }
+.zona-admin {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
+  gap: 10px 14px;
+  align-items: end;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--cafe-claro);
+}
+.zona-admin .casilla { padding-bottom: 12px; }
+.zona-admin .boton { margin-bottom: 8px; }
+@media (max-width: 760px) {
+  .zona-admin { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .zona-admin .casilla, .zona-admin .boton { padding-bottom: 0; margin-bottom: 0; justify-self: start; }
+}
