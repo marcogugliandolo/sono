@@ -24,6 +24,31 @@
     { id: 'prensa', nombre: 'Prensa francesa' }, { id: 'chemex', nombre: 'Chemex' }, { id: 'llevar', nombre: 'Para llevar' }
   ];
   var MAX_GRUPOS = 12;
+  /* Temas de color de la guía de marca. El nombre es el color de fondo. */
+  var TEMAS = [
+    { id: 'beige', nombre: 'Beige', nota: 'Fondo beige, letras y logo marrones', fondo: '#F3E0A6', tinta: '#562912', logo: '#562912' },
+    { id: 'marron', nombre: 'Marrón', nota: 'Fondo marrón, letras beige y logo oliva', fondo: '#562912', tinta: '#F3E0A6', logo: '#807F5B' },
+    { id: 'lila', nombre: 'Lila', nota: 'Fondo lila, letras marrones y logo beige', fondo: '#C9ADFF', tinta: '#562912', logo: '#F3E0A6' }
+  ];
+  function temaValido(t, porDefecto) {
+    return TEMAS.some(function (x) { return x.id === t; }) ? t : porDefecto;
+  }
+  function aplicarTemaWeb(t) {
+    var tema = temaValido(t, 'beige');
+    document.documentElement.setAttribute('data-tema', tema);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', TEMAS.filter(function (x) { return x.id === tema; })[0].fondo);
+    // La ventana de reserva va al revés que las demás: con los colores de fondo de la web
+    var reserva = document.getElementById('modal-reserva');
+    if (reserva) reserva.setAttribute('data-tema-ventana', tema);
+  }
+  function aplicarTemaPanel(t) {
+    var tema = temaValido(t, 'marron');
+    ['modal-admin', 'modal-login'].forEach(function (id) {
+      var m = document.getElementById(id);
+      if (m) m.setAttribute('data-tema-ventana', tema);
+    });
+  }
   var DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   var PIES_GALERIA = ['El local', 'La barra', 'Latte art', 'Desayunos', 'Buenos ratos'];
   var CLAVE_DE = { carta: 'carta', fotos: 'galeria', horarios: 'horario', datos: 'datos' };
@@ -367,6 +392,8 @@
   }
   function pintarDatos() {
     var d = estado.datos || {};
+    aplicarTemaWeb(d.tema);
+    if (!(typeof sucio === 'object' && sucio && sucio.datos)) aplicarTemaPanel(d.temaPanel);
     ponerDato('dato-direccion', d.direccion);
     ponerDato('dato-email', d.email);
     ponerDato('dato-telefono', d.telefono);
@@ -823,7 +850,7 @@
     if (k === 'carta') return { categorias: [], productos: [] };
     if (k === 'galeria') return { fotos: PIES_GALERIA.map(function (pie, i) { return { id: 'g' + (i + 1), pie: pie, foto: null }; }) };
     if (k === 'horario') return { dias: DIAS_SEMANA.map(function (dia) { return { dia: dia, texto: '' }; }), manana: [], tarde: [] };
-    return { direccion: '', email: '', telefono: '', instagram: '', abrimosPronto: true, paraLlevar: true, domicilio: true };
+    return { direccion: '', email: '', telefono: '', instagram: '', abrimosPronto: true, paraLlevar: true, domicilio: true, tema: 'beige', temaPanel: 'marron' };
   }
   function normalizar(k, b) {
     if (k === 'carta' && !Array.isArray(b.productos)) b.productos = [];
@@ -839,6 +866,7 @@
     if (k === 'datos' && b.abrimosPronto === undefined) b.abrimosPronto = true;
     if (k === 'datos' && b.paraLlevar === undefined) b.paraLlevar = true;
     if (k === 'datos' && b.domicilio === undefined) b.domicilio = true;
+    if (k === 'datos') { b.tema = temaValido(b.tema, 'beige'); b.temaPanel = temaValido(b.temaPanel, 'marron'); }
     if (k === 'carta') b.productos.forEach(function (p) { if (!Array.isArray(p.alergenos)) p.alergenos = []; });
     return b;
   }
@@ -1242,6 +1270,53 @@
     });
     grupo.appendChild(camposLlevar);
     cuerpo.appendChild(grupo);
+
+    var aspecto = el('section', 'admin__grupo');
+    aspecto.appendChild(el('h3', null, 'Aspecto'));
+    aspecto.appendChild(el('p', 'admin__ayuda', 'Elige los colores de la web y los del panel. El panel cambia al momento para que lo veas; la web cambia al pulsar «Guardar cambios».'));
+    aspecto.appendChild(selectorTema('Tema de la web', 'tema', b.tema, function (v) { b.tema = v; }));
+    aspecto.appendChild(selectorTema('Tema del panel', 'temaPanel', b.temaPanel, function (v) { b.temaPanel = v; aplicarTemaPanel(v); }));
+    cuerpo.appendChild(aspecto);
+  }
+  function selectorTema(titulo, clave, valor, alCambiar) {
+    var fs = el('fieldset', 'temas-admin');
+    fs.appendChild(el('legend', null, titulo));
+    var lista = el('div', 'temas-admin__lista');
+    TEMAS.forEach(function (t) {
+      var id = 'adm-' + clave + '-' + t.id;
+      var inp = el('input', 'oculto');
+      inp.type = 'radio';
+      inp.name = 'adm-' + clave;
+      inp.id = id;
+      inp.value = t.id;
+      inp.checked = valor === t.id;
+      inp.addEventListener('change', function () { if (inp.checked) { alCambiar(t.id); marcar(); } });
+      var lab = el('label', 'tema-opcion');
+      lab.htmlFor = id;
+      var muestra = el('span', 'tema-opcion__muestra');
+      muestra.style.setProperty('--m-fondo', t.fondo);
+      muestra.style.setProperty('--m-tinta', t.tinta);
+      muestra.style.setProperty('--m-logo', t.logo);
+      var ns = 'http://www.w3.org/2000/svg';
+      var logo = document.createElementNS(ns, 'svg');
+      logo.setAttribute('class', 'tema-opcion__logo');
+      logo.setAttribute('aria-hidden', 'true');
+      var u = document.createElementNS(ns, 'use');
+      u.setAttribute('href', '#logo-sono');
+      logo.appendChild(u);
+      muestra.appendChild(logo);
+      var lineas = el('span', 'tema-opcion__lineas');
+      lineas.appendChild(el('span'));
+      lineas.appendChild(el('span'));
+      muestra.appendChild(lineas);
+      lab.appendChild(muestra);
+      lab.appendChild(el('span', 'tema-opcion__nombre', t.nombre));
+      lab.appendChild(el('span', 'tema-opcion__nota', t.nota));
+      lista.appendChild(inp);
+      lista.appendChild(lab);
+    });
+    fs.appendChild(lista);
+    return fs;
   }
 
   /* Pestaña: reservas recibidas */
@@ -1462,6 +1537,7 @@
     if (!k) return;
     sucio[k] = false;
     borradores[k] = null;
+    if (k === 'datos') aplicarTemaPanel((estado.datos || {}).temaPanel);
     pintarPanel();
     mostrarEstado('Cambios descartados.');
   });
