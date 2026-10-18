@@ -373,14 +373,19 @@
     var ig = texto(d.instagram).replace(/^@/, '');
     document.querySelectorAll('.dato-instagram').forEach(function (n) {
       n.innerHTML = '';
+      var icono = svgUso('camara');
+      icono.setAttribute('class', 'icono-red');
       if (ig) {
-        var a = el('a', null, '@' + ig);
+        var a = el('a', 'enlace-red');
         a.href = 'https://www.instagram.com/' + encodeURIComponent(ig) + '/';
         a.target = '_blank';
         a.rel = 'noopener';
-        n.appendChild(document.createTextNode('Instagram: '));
+        a.setAttribute('aria-label', 'Instagram de SOÑO: @' + ig);
+        a.appendChild(icono);
+        a.appendChild(el('span', null, '@' + ig));
         n.appendChild(a);
       } else {
+        n.appendChild(icono);
         n.appendChild(pendiente('Instagram por confirmar'));
       }
     });
