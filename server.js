@@ -29,11 +29,13 @@ const MAX_JSON = 512 * 1024;
 const MAX_FOTO = 10 * 1024 * 1024;
 const MAX_RESERVAS = 3000;
 const MAX_MENSAJES = 1000;
+const MAX_PEDIDOS = 3000;
 
 const CATEGORIAS = ['espresso', 'desayunos', 'filtro'];
 const ICONO_CAT = { espresso: 'taza', desayunos: 'cruasan', filtro: 'filtro' };
 const ICONOS = ['taza', 'vaso', 'vaso-alto', 'coldbrew', 'cruasan', 'tostada', 'bol', 'bizcocho', 'filtro', 'prensa', 'chemex'];
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const ALERGENOS = ['gluten', 'crustaceos', 'huevos', 'pescado', 'cacahuetes', 'soja', 'lacteos', 'frutos', 'apio', 'mostaza', 'sesamo', 'sulfitos', 'altramuces', 'moluscos'];
 
 const RE_ID = /^[a-z0-9]{1,24}$/i;
 const RE_FOTO = /^[a-f0-9]{32}\.(jpg|png|webp)$/;
@@ -73,6 +75,7 @@ const CSP = [
 let contenido = null;
 let reservas = [];
 let mensajes = [];
+let pedidos = [];
 const sesiones = new Map();        // token -> caducidad (ms)
 const intentosLogin = new Map();   // ip -> { fallos, bloqueadoHasta }
 const envios = new Map();          // 'tipo:ip' -> [marcas de tiempo]
@@ -187,12 +190,37 @@ async function iniciarDatos() {
     await guardarArchivo('contenido.json', contenido);
     console.log('[soño] Contenido inicial creado en', DIR_DATOS);
   }
+  await completarContenido();
   reservas = await leerArchivo('reservas.json', []);
   mensajes = await leerArchivo('mensajes.json', []);
+  pedidos = await leerArchivo('pedidos.json', []);
+  const limitePedidos = new Date(Date.now() - 30 * 86400000).toISOString();
+  const antesPedidos = pedidos.length;
+  pedidos = pedidos.filter((p) => p.creado >= limitePedidos);
+  if (pedidos.length !== antesPedidos) await guardarArchivo('pedidos.json', pedidos);
   const limite = hoyISO(-90);
   const antes = reservas.length;
   reservas = reservas.filter((r) => r.fecha >= limite);
   if (reservas.length !== antes) await guardarArchivo('reservas.json', reservas);
+}
+
+/* Completa contenido guardado con versiones anteriores de la web:
+ * alérgenos de los productos de ejemplo (solo si el producto no se ha renombrado)
+ * y los ajustes de pedidos para llevar. */
+async function completarContenido() {
+  const inicial = JSON.parse(await fsp.readFile(ARCHIVO_INICIAL, 'utf8'));
+  const porId = new Map(inicial.carta.productos.map((p) => [p.id, p]));
+  let cambiado = false;
+  contenido.carta.productos.forEach((p) => {
+    if (!Array.isArray(p.alergenos)) {
+      const original = porId.get(p.id);
+      p.alergenos = original && original.nombre === p.nombre && Array.isArray(original.alergenos) ? original.alergenos.slice() : [];
+      cambiado = true;
+    }
+  });
+  if (contenido.datos.paraLlevar === undefined) { contenido.datos.paraLlevar = true; cambiado = true; }
+  if (contenido.datos.domicilio === undefined) { contenido.datos.domicilio = true; cambiado = true; }
+  if (cambiado) await guardarArchivo('contenido.json', contenido);
 }
 
 /* ---------- Validación del contenido editable ---------- */
@@ -236,6 +264,7 @@ function validarCarta(c) {
         desc: textoLargo(p.desc, 400),
         icono: ICONOS.includes(p.icono) ? p.icono : ICONO_CAT[cat],
         etiquetas,
+        alergenos: ALERGENOS.filter((a) => Array.isArray(p.alergenos) && p.alergenos.includes(a)),
         foto: validarFoto(p.foto)
       };
     })
@@ -286,7 +315,9 @@ function validarDatos(d) {
     email,
     telefono: texto(d.telefono, 30),
     instagram,
-    abrimosPronto: d.abrimosPronto !== false
+    abrimosPronto: d.abrimosPronto !== false,
+    paraLlevar: d.paraLlevar !== false,
+    domicilio: d.domicilio !== false
   };
 }
 
@@ -542,6 +573,73 @@ async function api(req, res, pathname) {
     exigirAdmin(req);
     reservas = reservas.filter((r) => r.id !== mReserva[1]);
     await guardarArchivo('reservas.json', reservas);
+    return enviarJSON(res, 200, { ok: true });
+  }
+
+  if (pathname === '/api/pedidos' && metodo === 'POST') {
+    if (!mismoOrigen(req)) throw errorCliente('Petición no permitida.', 403);
+    const datos = await leerJSON(req);
+    if (texto(datos.web, 200)) return enviarJSON(res, 201, { ok: true });   // trampa para bots
+    if (contenido.datos.paraLlevar === false) throw errorCliente('Ahora mismo no aceptamos pedidos para llevar.', 409);
+    const tipo = datos.tipo === 'domicilio' ? 'domicilio' : (datos.tipo === 'recoger' ? 'recoger' : null);
+    if (!tipo) throw errorCliente('Elige si vienes a recogerlo o te lo llevamos.');
+    if (tipo === 'domicilio' && contenido.datos.domicilio === false) throw errorCliente('Ahora mismo no hacemos entregas a domicilio. Puedes pedir para recoger.');
+    const nombre = texto(datos.nombre, 80);
+    if (!nombre) throw errorCliente('Escribe tu nombre para el pedido.');
+    const telefono = texto(datos.telefono, 25);
+    if (telefono.replace(/[^\d]/g, '').length < 9) throw errorCliente('Revisa el teléfono: necesitamos al menos 9 cifras para avisarte.');
+    const direccion = tipo === 'domicilio' ? texto(datos.direccion, 160) : '';
+    if (tipo === 'domicilio' && direccion.length < 5) throw errorCliente('Escribe la dirección de entrega.');
+    const entrada = Array.isArray(datos.lineas) ? datos.lineas.slice(0, 20) : [];
+    const cantidades = new Map();
+    for (const l of entrada) {
+      const id = String((l && l.id) || '');
+      const cantidad = Number(l && l.cantidad);
+      if (!id) continue;
+      const producto = contenido.carta.productos.find((p) => p.id === id);
+      if (!producto) throw errorCliente('Uno de los productos ya no está en la carta. Revisa el pedido.');
+      if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 20) throw errorCliente('Las cantidades van de 1 a 20 por producto.');
+      cantidades.set(id, Math.min(20, (cantidades.get(id) || 0) + cantidad));
+    }
+    if (!cantidades.size) throw errorCliente('Elige al menos un producto de la carta.');
+    let totalCent = 0;
+    const lineas = [];
+    for (const [id, cantidad] of cantidades) {
+      const p = contenido.carta.productos.find((x) => x.id === id);
+      const cent = Math.round(Number(p.precio.replace(',', '.')) * 100);
+      totalCent += cent * cantidad;
+      lineas.push({ id, nombre: p.nombre, precio: p.precio, cantidad });
+    }
+    if (!permitirEnvio('pedido', ip, 6, 3600000)) throw errorCliente('Has hecho muchos pedidos seguidos. Si necesitas más, llámanos.', 429);
+    if (pedidos.length >= MAX_PEDIDOS) throw errorCliente('No podemos aceptar más pedidos ahora mismo. Llámanos, por favor.', 503);
+    const total = (totalCent / 100).toFixed(2).replace('.', ',');
+    const pedido = {
+      id: crypto.randomBytes(8).toString('hex'),
+      creado: new Date().toISOString(),
+      tipo,
+      nombre,
+      telefono,
+      direccion,
+      lineas,
+      total,
+      notas: textoLargo(datos.notas, 500)
+    };
+    pedidos.unshift(pedido);
+    await guardarArchivo('pedidos.json', pedidos);
+    console.log('[soño] Nuevo pedido:', tipo, total + ' €');
+    return enviarJSON(res, 201, { ok: true, total, lineas });
+  }
+
+  if (pathname === '/api/pedidos' && metodo === 'GET') {
+    exigirAdmin(req);
+    return enviarJSON(res, 200, { pedidos });
+  }
+
+  const mPedido = pathname.match(/^\/api\/pedidos\/([a-f0-9]{16})$/);
+  if (mPedido && metodo === 'DELETE') {
+    exigirAdmin(req);
+    pedidos = pedidos.filter((p) => p.id !== mPedido[1]);
+    await guardarArchivo('pedidos.json', pedidos);
     return enviarJSON(res, 200, { ok: true });
   }
 
