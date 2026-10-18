@@ -264,6 +264,7 @@ input:focus-visible + label.boton { outline: 3px solid var(--acento); outline-of
   .titila--c { animation-delay: -1.7s; }
   .titila--d { animation-delay: -0.4s; }
   .giro { animation: giro 24s linear infinite; transform-origin: 60px 60px; }
+  .sol-gira { animation: giro 40s linear infinite; transform-box: fill-box; transform-origin: center; }
   .balancea { animation: balancea 4.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 50%; }
   .carta__icono { transition: transform 0.35s cubic-bezier(.3,1.6,.5,1); }
   .carta__col:hover .carta__icono { transform: rotate(-8deg) scale(1.08); }
@@ -1226,3 +1227,8 @@ input:focus-visible + .alergeno-chip { outline: 3px solid var(--acento); outline
 .modal--admin .campo textarea:focus-visible,
 .modal--admin .campo select:focus-visible,
 .modal--admin .admin__dia input:focus-visible { outline: 3px solid #562912; outline-offset: 2px; border-color: #562912; }
+
+/* Redes sociales: icono de línea, como el resto de dibujos, y el usuario al lado */
+.dato-instagram { display: inline-flex; align-items: center; gap: 8px; }
+.enlace-red { display: inline-flex; align-items: center; gap: 8px; }
+.icono-red { width: 26px; height: 26px; flex: none; --grosor: 2.4; overflow: visible; }
