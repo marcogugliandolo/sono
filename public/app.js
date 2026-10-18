@@ -2,14 +2,28 @@
 (function () {
   'use strict';
 
+  /* Logo: copia el dibujo dentro de cada <svg class="logo"> para que el café de la Ñ
+     se pueda animar en todos los navegadores (dentro de <use> algunos no lo animan). */
+  (function () {
+    var simbolo = document.getElementById('logo-sono');
+    if (!simbolo) return;
+    document.querySelectorAll('svg.logo > use').forEach(function (u) {
+      var svg = u.parentNode;
+      svg.setAttribute('viewBox', simbolo.getAttribute('viewBox'));
+      Array.prototype.forEach.call(simbolo.childNodes, function (n) { svg.appendChild(n.cloneNode(true)); });
+      svg.removeChild(u);
+    });
+  })();
+
   /* ---------- Constantes ---------- */
-  var CATEGORIAS = [
-    { id: 'espresso', nombre: 'Barra de espresso', icono: 'taza' },
-    { id: 'desayunos', nombre: 'Desayunos', icono: 'cruasan' },
-    { id: 'filtro', nombre: 'Café de filtro', icono: 'filtro' }
+  /* Dibujos que se pueden elegir para cada grupo de la carta */
+  var ICONOS = [
+    { id: 'taza', nombre: 'Taza' }, { id: 'vaso', nombre: 'Vaso' }, { id: 'vaso-alto', nombre: 'Vaso alto' },
+    { id: 'coldbrew', nombre: 'Café frío' }, { id: 'cruasan', nombre: 'Cruasán' }, { id: 'tostada', nombre: 'Tostada' },
+    { id: 'bol', nombre: 'Bol' }, { id: 'bizcocho', nombre: 'Bizcocho' }, { id: 'filtro', nombre: 'Filtro' },
+    { id: 'prensa', nombre: 'Prensa francesa' }, { id: 'chemex', nombre: 'Chemex' }, { id: 'llevar', nombre: 'Para llevar' }
   ];
-  var NOMBRE_CAT = {};
-  CATEGORIAS.forEach(function (c) { NOMBRE_CAT[c.id] = c.nombre; });
+  var MAX_GRUPOS = 12;
   var DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   var PIES_GALERIA = ['El local', 'La barra', 'Latte art', 'Desayunos', 'Buenos ratos'];
   var CLAVE_DE = { carta: 'carta', fotos: 'galeria', horarios: 'horario', datos: 'datos' };
@@ -79,8 +93,21 @@
     s.appendChild(u);
     return s;
   }
+  function categorias() {
+    return (estado.carta && Array.isArray(estado.carta.categorias)) ? estado.carta.categorias : [];
+  }
+  function nombreGrupo(lista, id) {
+    var g = lista.filter(function (c) { return c.id === id; })[0];
+    return g ? g.nombre : '';
+  }
+  /* Productos en el orden en que salen en la carta (grupo a grupo) */
   function productos() {
-    return (estado.carta && Array.isArray(estado.carta.productos)) ? estado.carta.productos : [];
+    var todos = (estado.carta && Array.isArray(estado.carta.productos)) ? estado.carta.productos : [];
+    var orden = [];
+    categorias().forEach(function (c) {
+      todos.forEach(function (p) { if (p.cat === c.id) orden.push(p); });
+    });
+    return orden;
   }
 
   /* Llamadas al servidor */
@@ -117,6 +144,7 @@
     pintarHorario();
     pintarDatos();
     pintarLineas();
+    pintarRecogida();
   }
 
   /* ---------- Ventanas emergentes ---------- */
@@ -155,14 +183,24 @@
   /* ---------- Carta pública ---------- */
   function pintarCarta() {
     var lista = productos();
-    document.querySelectorAll('.carta__lista').forEach(function (ul) {
-      var cat = ul.getAttribute('data-categoria');
-      ul.innerHTML = '';
-      if (!cargado) { ul.appendChild(el('li', 'estado-vacio', 'Cargando la carta…')); return; }
-      if (sinDatos) { ul.appendChild(el('li', 'estado-vacio', 'No se ha podido cargar la carta. Recarga la página en unos segundos.')); return; }
+    var cont = $('carta-grupos');
+    cont.innerHTML = '';
+    if (!cargado) { cont.appendChild(el('p', 'estado-vacio', 'Cargando la carta…')); return; }
+    if (sinDatos) { cont.appendChild(el('p', 'estado-vacio', 'No se ha podido cargar la carta. Recarga la página en unos segundos.')); return; }
+    var grupos = categorias();
+    if (!grupos.length) { cont.appendChild(el('p', 'estado-vacio', 'Muy pronto podrás ver aquí nuestra carta.')); return; }
+    grupos.forEach(function (cat) {
+      var col = el('article', 'carta__col');
+      var ico = svgUso(cat.icono || 'taza');
+      ico.setAttribute('class', 'carta__icono');
+      col.appendChild(ico);
+      col.appendChild(el('h3', null, cat.nombre));
+      if (cat.desc) col.appendChild(el('p', 'carta__desc', cat.desc));
+      var ul = el('ul', 'carta__lista');
+      ul.setAttribute('data-categoria', cat.id);
       var items = [];
-      lista.forEach(function (p, i) { if (p.cat === cat) items.push(i); });
-      if (!items.length) { ul.appendChild(el('li', 'estado-vacio', 'Pronto habrá productos en esta sección.')); return; }
+      lista.forEach(function (p, i) { if (p.cat === cat.id) items.push(i); });
+      if (!items.length) ul.appendChild(el('li', 'estado-vacio', 'Pronto habrá productos en esta sección.'));
       items.forEach(function (i) {
         var p = lista[i];
         var li = el('li');
@@ -178,6 +216,8 @@
         li.appendChild(b);
         ul.appendChild(li);
       });
+      col.appendChild(ul);
+      cont.appendChild(col);
     });
   }
 
@@ -200,7 +240,7 @@
     if (!lista.length) return;
     actual = (i + lista.length) % lista.length;
     var p = lista[actual];
-    $('producto-categoria').textContent = NOMBRE_CAT[p.cat] || '';
+    $('producto-categoria').textContent = nombreGrupo(categorias(), p.cat);
     $('producto-nombre').textContent = p.nombre || 'Producto';
     $('producto-precio').textContent = precioBonito(p.precio);
     $('producto-desc').textContent = p.desc || '';
@@ -488,7 +528,7 @@
     var vacio = el('option', null, 'Elige un producto');
     vacio.value = '';
     sel.appendChild(vacio);
-    CATEGORIAS.forEach(function (cat) {
+    categorias().forEach(function (cat) {
       var grupo = document.createElement('optgroup');
       grupo.label = cat.nombre;
       productos().forEach(function (p) {
@@ -552,10 +592,88 @@
   function actualizarTipo() {
     var domicilio = $('tipo-domicilio').checked;
     $('campo-direccion').hidden = !domicilio;
+    $('campo-recogida').hidden = domicilio;
+  }
+
+  /* Día y hora de recogida: las horas del horario (mañana y tarde), de hoy a pasado mañana */
+  var recogida = { dia: 0, hora: '' };
+  var DIAS_RECOGIDA = 3;
+  function minutos(t) { var x = t.split(':'); return Number(x[0]) * 60 + Number(x[1]); }
+  function horasRecogida(dia) {
+    var h = estado.horario || {};
+    var todas = [].concat(Array.isArray(h.manana) ? h.manana : [], Array.isArray(h.tarde) ? h.tarde : [])
+      .filter(function (t, i, a) { return RE_HORA.test(t) && a.indexOf(t) === i; })
+      .sort();
+    if (dia === 0) {
+      var ahora = new Date();
+      var limite = ahora.getHours() * 60 + ahora.getMinutes() + 15;   // margen para prepararlo
+      todas = todas.filter(function (t) { return minutos(t) >= limite; });
+    }
+    return todas;
+  }
+  function textoDia(i) {
+    if (i === 0) return 'hoy';
+    if (i === 1) return 'mañana';
+    return 'el ' + fLargo.format(new Date(fechas[i] + 'T12:00:00')).replace(',', '');
+  }
+  function pintarRecogida() {
+    var diasEl = $('recogida-dias');
+    var horasEl = $('recogida-horas');
+    var nota = $('recogida-nota');
+    diasEl.innerHTML = '';
+    horasEl.innerHTML = '';
+    if (!horasRecogida(1).length) {
+      // Sin horas en el horario: se acuerda por teléfono
+      diasEl.hidden = true;
+      horasEl.hidden = true;
+      nota.hidden = false;
+      nota.textContent = cargado ? 'Te llamamos para acordar la hora de recogida.' : 'Cargando horas…';
+      recogida.hora = '';
+      return;
+    }
+    diasEl.hidden = false;
+    horasEl.hidden = false;
+    nota.hidden = true;
+    var disponibles = [];
+    for (var i = 0; i < DIAS_RECOGIDA; i++) { if (horasRecogida(i).length) disponibles.push(i); }
+    if (disponibles.indexOf(recogida.dia) === -1) { recogida.dia = disponibles[0]; recogida.hora = ''; }
+    disponibles.forEach(function (i) {
+      var d = new Date(fechas[i] + 'T12:00:00');
+      var input = el('input', 'oculto');
+      input.type = 'radio';
+      input.name = 'recogida-dia';
+      input.id = 'recogida-dia-' + i;
+      input.value = String(i);
+      input.checked = i === recogida.dia;
+      var label = el('label', 'chip chip--dia');
+      label.htmlFor = input.id;
+      label.appendChild(el('span', 'arriba', i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : sinPunto(fCorto.format(d))));
+      label.appendChild(el('span', 'numero', String(d.getDate())));
+      label.appendChild(el('span', 'abajo', sinPunto(fMes.format(d))));
+      diasEl.appendChild(input);
+      diasEl.appendChild(label);
+    });
+    var horas = horasRecogida(recogida.dia);
+    if (horas.indexOf(recogida.hora) === -1) recogida.hora = '';
+    horas.forEach(function (t) {
+      var input = el('input', 'oculto');
+      input.type = 'radio';
+      input.name = 'recogida-hora';
+      input.id = 'recogida-hora-' + t.replace(':', '');
+      input.value = t;
+      input.checked = t === recogida.hora;
+      var label = el('label', 'chip chip--hora', t);
+      label.htmlFor = input.id;
+      horasEl.appendChild(input);
+      horasEl.appendChild(label);
+    });
   }
   formPedido.addEventListener('input', function () { if (!botonPedido.disabled) avisoPedido.textContent = ''; });
   formPedido.addEventListener('change', function (e) {
-    if (e.target && e.target.name === 'tipo') { avisoPedido.textContent = ''; actualizarTipo(); }
+    var n = e.target && e.target.name;
+    if (n === 'tipo') { avisoPedido.textContent = ''; actualizarTipo(); }
+    if (n === 'recogida-dia') { recogida.dia = Number(e.target.value); recogida.hora = ''; pintarRecogida(); }
+    if (n === 'recogida-hora') { recogida.hora = e.target.value; avisoPedido.textContent = ''; }
   });
   $('pedido-anadir').addEventListener('click', function () {
     lineas.push({ id: '', cantidad: 1 });
@@ -575,6 +693,14 @@
     if (!nombre) { avisoPedido.textContent = 'Escribe tu nombre para el pedido.'; formPedido.nombre.focus(); return; }
     if (telefono.replace(/[^\d]/g, '').length < 9) { avisoPedido.textContent = 'Revisa el teléfono: necesitamos al menos 9 cifras para avisarte.'; formPedido.telefono.focus(); return; }
     if (tipo === 'domicilio' && direccion.length < 5) { avisoPedido.textContent = 'Escribe la dirección de entrega.'; formPedido.direccion.focus(); return; }
+    var conHora = tipo === 'recoger' && horasRecogida(1).length > 0;
+    if (conHora && !recogida.hora) {
+      pintarRecogida();
+      avisoPedido.textContent = 'Elige a qué hora pasas a recogerlo.';
+      $('campo-recogida').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    var diaElegido = recogida.dia;
 
     botonPedido.disabled = true;
     avisoPedido.textContent = 'Enviando el pedido…';
@@ -584,17 +710,21 @@
       telefono: telefono,
       direccion: direccion,
       lineas: elegidas.map(function (l) { return { id: l.id, cantidad: l.cantidad }; }),
+      recogida: conHora ? { fecha: fechas[recogida.dia], hora: recogida.hora } : null,
       notas: formPedido.notas.value,
       web: formPedido.web.value
     }).then(function (r) {
       avisoPedido.textContent = '';
       var resumenLineas = r.lineas.map(function (l) { return l.cantidad + ' × ' + l.nombre; }).join(', ');
       $('confirmacion-pedido-detalle').textContent = resumenLineas + '. Total: ' + r.total + ' €. ' +
-        (tipo === 'domicilio' ? 'Te lo llevamos a ' + direccion + '.' : 'Te esperamos en SOÑO para recogerlo.');
+        (tipo === 'domicilio' ? 'Te lo llevamos a ' + direccion + '.'
+          : r.recogida ? 'Te esperamos en SOÑO ' + textoDia(diaElegido) + ' a las ' + r.recogida.hora + '.'
+          : 'Te esperamos en SOÑO para recogerlo.');
       formPedido.hidden = true;
       confPedido.hidden = false;
     }).catch(function (err) {
       avisoPedido.textContent = err.message;
+      pintarRecogida();   // por si la hora elegida ya ha pasado
     }).then(function () {
       botonPedido.disabled = false;
     });
@@ -603,11 +733,13 @@
   $('otro-pedido').addEventListener('click', function () {
     formPedido.reset();
     lineas = [{ id: '', cantidad: 1 }];
+    recogida = { dia: 0, hora: '' };
     avisoPedido.textContent = '';
     confPedido.hidden = true;
     formPedido.hidden = false;
     actualizarTipo();
     pintarLineas();
+    pintarRecogida();
   });
 
   /* ---------- Formulario de contacto ---------- */
@@ -688,13 +820,14 @@
   }
 
   function vacio(k) {
-    if (k === 'carta') return { productos: [] };
+    if (k === 'carta') return { categorias: [], productos: [] };
     if (k === 'galeria') return { fotos: PIES_GALERIA.map(function (pie, i) { return { id: 'g' + (i + 1), pie: pie, foto: null }; }) };
     if (k === 'horario') return { dias: DIAS_SEMANA.map(function (dia) { return { dia: dia, texto: '' }; }), manana: [], tarde: [] };
     return { direccion: '', email: '', telefono: '', instagram: '', abrimosPronto: true, paraLlevar: true, domicilio: true };
   }
   function normalizar(k, b) {
     if (k === 'carta' && !Array.isArray(b.productos)) b.productos = [];
+    if (k === 'carta' && !Array.isArray(b.categorias)) b.categorias = [];
     if (k === 'galeria' && (!Array.isArray(b.fotos) || !b.fotos.length)) b.fotos = vacio('galeria').fotos;
     if (k === 'horario') {
       var porDia = {};
@@ -757,8 +890,21 @@
     cuerpo.scrollTop = 0;
   }
 
+  /* Lleva un campo al centro del panel moviendo solo la zona de contenido
+     (scrollIntoView también desplazaría la ventana del panel y taparía la cabecera) */
+  function enfocarEnPanel(campo) {
+    campo.focus({ preventScroll: true });
+    var arriba = campo.getBoundingClientRect().top - cuerpo.getBoundingClientRect().top + cuerpo.scrollTop;
+    cuerpo.scrollTop = Math.max(0, arriba - cuerpo.clientHeight / 2);
+    modalAdmin.scrollTop = 0;
+  }
+  var ultimaPestanaPintada = null;
   function pintarPanel() {
     var k = claveActual();
+    // Al redibujar la misma pestaña (añadir, mover o borrar algo) se mantiene la posición de lectura
+    var mismaPestana = ultimaPestanaPintada === pestana;
+    var posicion = cuerpo.scrollTop;
+    ultimaPestanaPintada = pestana;
     cuerpo.innerHTML = '';
     btnGuardar.hidden = !k;
     btnDescartar.hidden = !k;
@@ -770,6 +916,7 @@
     if (pestana === 'reservas') panelReservas();
     if (pestana === 'pedidos') panelPedidos();
     if (pestana === 'mensajes') panelMensajes();
+    cuerpo.scrollTop = mismaPestana ? posicion : 0;
     if (!guardando) mostrarEstado(k && sucio[k] ? 'Hay cambios sin guardar.' : '');
     btnDescartar.disabled = !(k && sucio[k]);
     btnGuardar.disabled = guardando;
@@ -828,25 +975,109 @@
   /* Pestaña: carta y precios */
   function panelCarta() {
     var b = borrador('carta');
-    cuerpo.appendChild(el('p', 'admin__ayuda', 'Cambia nombres, precios, descripciones, alérgenos y fotos. Los cambios se ven en la web en cuanto pulsas «Guardar cambios». Revisa bien los alérgenos de cada producto: es información que la ley obliga a dar.'));
-    CATEGORIAS.forEach(function (cat) {
-      var grupo = el('section', 'admin__grupo');
-      grupo.appendChild(el('h3', null, cat.nombre));
+    cuerpo.appendChild(el('p', 'admin__ayuda', 'Organiza la carta en grupos (por ejemplo «Zumos» o «Repostería») y dentro de cada grupo cambia nombres, precios, descripciones, alérgenos y fotos. Los cambios se ven en la web en cuanto pulsas «Guardar cambios». Revisa bien los alérgenos de cada producto: es información que la ley obliga a dar.'));
+    if (!b.categorias.length) cuerpo.appendChild(el('p', 'estado-vacio', 'La carta no tiene grupos. Crea el primero con «+ Añadir grupo».'));
+    b.categorias.forEach(function (cat, n) {
+      var grupo = el('section', 'admin__grupo grupo-carta');
+      var cab = el('div', 'grupo-carta__cabecera');
+      var titulo = el('h3', null, texto(cat.nombre) || 'Grupo sin nombre');
+      cab.appendChild(titulo);
+      var acc = el('div', 'acciones-mini');
+      var subir = botonMini('↑ Subir', function () { mover(n, -1); });
+      subir.disabled = n === 0;
+      subir.setAttribute('aria-label', 'Subir el grupo ' + (texto(cat.nombre) || (n + 1)));
+      var bajar = botonMini('↓ Bajar', function () { mover(n, 1); });
+      bajar.disabled = n === b.categorias.length - 1;
+      bajar.setAttribute('aria-label', 'Bajar el grupo ' + (texto(cat.nombre) || (n + 1)));
+      acc.appendChild(subir);
+      acc.appendChild(bajar);
+      var cuantos = b.productos.filter(function (p) { return p.cat === cat.id; }).length;
+      acc.appendChild(botonBorrar(cuantos === 1 ? 'Borrar grupo y su producto' : cuantos ? 'Borrar grupo y sus ' + cuantos + ' productos' : 'Borrar grupo', function () {
+        b.categorias.splice(n, 1);
+        b.productos = b.productos.filter(function (p) { return p.cat !== cat.id; });
+        marcar();
+        pintarPanel();
+      }));
+      cab.appendChild(acc);
+      grupo.appendChild(cab);
+
+      var datosGrupo = el('div', 'grupo-carta__datos');
+      var fila = el('div', 'fila-2 fila-2--ancha');
+      fila.appendChild(campoTexto('adm-grupo-nombre-' + cat.id, 'Nombre del grupo', cat.nombre, function (v) {
+        cat.nombre = v;
+        titulo.textContent = texto(v) || 'Grupo sin nombre';
+        botonAnadir.textContent = textoAnadir();
+      }, { maxlength: '40', placeholder: 'Zumos y batidos' }));
+      fila.appendChild(campoTexto('adm-grupo-desc-' + cat.id, 'Frase debajo del nombre (opcional)', cat.desc, function (v) { cat.desc = v; }, { maxlength: '120', placeholder: 'Naturales y hechos al momento.' }));
+      datosGrupo.appendChild(fila);
+      datosGrupo.appendChild(selectorIcono(cat));
+      grupo.appendChild(datosGrupo);
+
       var lista = el('div', 'admin__lista admin__lista--productos');
       var deCat = b.productos.filter(function (p) { return p.cat === cat.id; });
       if (!deCat.length) lista.appendChild(el('p', 'estado-vacio', 'Sin productos todavía.'));
       deCat.forEach(function (p) { lista.appendChild(tarjetaProducto(b, p)); });
       grupo.appendChild(lista);
-      grupo.appendChild(botonMini('+ Añadir producto', function () {
+      function textoAnadir() { return texto(cat.nombre) ? '+ Añadir producto a «' + texto(cat.nombre) + '»' : '+ Añadir producto'; }
+      var botonAnadir = botonMini(textoAnadir(), function () {
         var nuevo = { id: 'p' + Date.now().toString(36), cat: cat.id, nombre: '', precio: '', desc: '', icono: cat.icono, etiquetas: [], alergenos: [], foto: null };
         b.productos.push(nuevo);
         marcar();
         pintarPanel();
         var campo = $('adm-nombre-' + nuevo.id);
-        if (campo) { campo.focus(); campo.scrollIntoView({ block: 'center' }); }
-      }));
+        if (campo) enfocarEnPanel(campo);
+      });
+      grupo.appendChild(botonAnadir);
       cuerpo.appendChild(grupo);
     });
+
+    var nuevoGrupo = el('div', 'grupo-carta__nuevo');
+    var botonGrupo = el('button', 'boton boton--lleno boton--peque', '+ Añadir grupo');
+    botonGrupo.type = 'button';
+    botonGrupo.disabled = b.categorias.length >= MAX_GRUPOS;
+    botonGrupo.addEventListener('click', function () {
+      var cat = { id: 'c' + Date.now().toString(36), nombre: '', desc: '', icono: 'taza' };
+      b.categorias.push(cat);
+      marcar();
+      pintarPanel();
+      var campo = $('adm-grupo-nombre-' + cat.id);
+      if (campo) enfocarEnPanel(campo);
+    });
+    nuevoGrupo.appendChild(botonGrupo);
+    nuevoGrupo.appendChild(el('p', 'admin__ayuda', b.categorias.length >= MAX_GRUPOS ? 'Has llegado al máximo de ' + MAX_GRUPOS + ' grupos.' : 'Cada grupo sale como una columna de la carta, en este mismo orden.'));
+    cuerpo.appendChild(nuevoGrupo);
+
+    function mover(n, paso) {
+      var destino = n + paso;
+      if (destino < 0 || destino >= b.categorias.length) return;
+      var g = b.categorias.splice(n, 1)[0];
+      b.categorias.splice(destino, 0, g);
+      marcar();
+      pintarPanel();
+    }
+  }
+  function selectorIcono(cat) {
+    var fs = el('fieldset', 'iconos-admin');
+    fs.appendChild(el('legend', null, 'Dibujo del grupo'));
+    var lista = el('div', 'iconos-admin__lista');
+    ICONOS.forEach(function (ic) {
+      var id = 'adm-grupo-icono-' + cat.id + '-' + ic.id;
+      var inp = el('input', 'oculto');
+      inp.type = 'radio';
+      inp.name = 'adm-grupo-icono-' + cat.id;
+      inp.id = id;
+      inp.checked = (cat.icono || 'taza') === ic.id;
+      inp.addEventListener('change', function () { if (inp.checked) { cat.icono = ic.id; marcar(); } });
+      var lab = el('label', 'icono-chip');
+      lab.htmlFor = id;
+      lab.title = ic.nombre;
+      lab.appendChild(svgUso(ic.id));
+      lab.appendChild(el('span', 'solo-lector', ic.nombre));
+      lista.appendChild(inp);
+      lista.appendChild(lab);
+    });
+    fs.appendChild(lista);
+    return fs;
   }
   function tarjetaProducto(b, p) {
     var t = el('div', 'tarjeta-admin');
@@ -861,6 +1092,20 @@
     fila.appendChild(campoTexto('adm-precio-' + p.id, 'Precio (€)', p.precio, function (v) { p.precio = v; }, { inputmode: 'decimal', placeholder: '2,50' }));
     campos.appendChild(fila);
     campos.appendChild(campoArea('adm-desc-' + p.id, 'Descripción', p.desc, function (v) { p.desc = v; }));
+    if (b.categorias.length > 1) {
+      var campoGrupo = el('div', 'campo');
+      var lg = el('label', null, 'Grupo'); lg.htmlFor = 'adm-cat-' + p.id;
+      var sel = el('select'); sel.id = 'adm-cat-' + p.id;
+      b.categorias.forEach(function (c) {
+        var o = el('option', null, texto(c.nombre) || 'Grupo sin nombre');
+        o.value = c.id;
+        if (c.id === p.cat) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change', function () { p.cat = sel.value; marcar(); pintarPanel(); });
+      campoGrupo.appendChild(lg); campoGrupo.appendChild(sel);
+      campos.appendChild(campoGrupo);
+    }
     campos.appendChild(campoTexto('adm-etiq-' + p.id, 'Etiquetas (separadas por comas)', (p.etiquetas || []).join(', '), function (v) {
       p.etiquetas = v.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     }, { placeholder: 'Caliente, Con leche' }));
@@ -1118,6 +1363,10 @@
         var tel = el('a', null, x.telefono); tel.href = 'tel:' + x.telefono.replace(/[^\d+]/g, ''); datos.appendChild(tel);
         if (x.direccion) datos.appendChild(el('span', null, x.direccion));
         t.appendChild(datos);
+        if (x.recogida) {
+          var cuando = fDiaLargo.format(new Date(x.recogida.fecha + 'T12:00:00'));
+          t.appendChild(el('p', 'registro__recogida', 'Pasa a recogerlo el ' + cuando + ' a las ' + x.recogida.hora));
+        }
         var ul = el('ul', 'registro__lineas');
         x.lineas.forEach(function (l) {
           var li = el('li');
@@ -1159,9 +1408,12 @@
   /* Validación y guardado */
   function validar(k, b) {
     if (k === 'carta') {
+      for (var g = 0; g < b.categorias.length; g++) {
+        if (!texto(b.categorias[g].nombre)) return 'Hay un grupo sin nombre (el ' + (g + 1) + 'º). Escríbelo o borra el grupo.';
+      }
       for (var i = 0; i < b.productos.length; i++) {
         var p = b.productos[i];
-        if (!texto(p.nombre)) return 'Hay un producto sin nombre en «' + (NOMBRE_CAT[p.cat] || 'la carta') + '». Escríbelo o elimina el producto.';
+        if (!texto(p.nombre)) return 'Hay un producto sin nombre en «' + (nombreGrupo(b.categorias, p.cat) || 'la carta') + '». Escríbelo o elimina el producto.';
         if (!RE_PRECIO.test(texto(p.precio))) return 'Revisa el precio de «' + texto(p.nombre) + '»: escribe solo el número, por ejemplo 2,50.';
       }
     }
