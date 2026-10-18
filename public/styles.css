@@ -1202,3 +1202,27 @@ input:focus-visible + .alergeno-chip { outline: 3px solid var(--acento); outline
 .modal--login .campo input:focus-visible { outline: 3px solid var(--cafe); outline-offset: 2px; border-color: var(--cafe); }
 .modal--login .boton--lleno { background: var(--cafe); border-color: var(--cafe); color: var(--fondo); }
 .modal--login .aviso { color: #A3361A; font-weight: 600; }
+
+/* Panel de administración en claro, como el acceso: fondo beige con letras y detalles marrones.
+   Se cambian los colores solo dentro del panel; el resto de reglas del panel los usan tal cual. */
+.modal--admin {
+  --cafe: #F3E0A6;              /* fondo del panel */
+  --fondo: #562912;             /* títulos */
+  --acento: #562912;            /* pestaña activa, botones y opciones marcadas */
+  --amarillo-palido: #562912;   /* texto */
+  --cafe-claro: #EAD597;        /* tarjetas */
+  --linea-sobre-cafe: #B39A6E;  /* líneas y bordes */
+  --alerta: #A3361A;            /* borrar y avisos */
+  --campo-claro: #FAF1D6;       /* campos de texto */
+}
+.modal--admin .campo input,
+.modal--admin .campo textarea,
+.modal--admin .campo select,
+.modal--admin .admin__dia input { background: var(--campo-claro); border-color: #562912; color: #562912; }
+.modal--admin .campo input::placeholder,
+.modal--admin .campo textarea::placeholder,
+.modal--admin .admin__dia input::placeholder { color: #562912; opacity: 0.5; }
+.modal--admin .campo input:focus-visible,
+.modal--admin .campo textarea:focus-visible,
+.modal--admin .campo select:focus-visible,
+.modal--admin .admin__dia input:focus-visible { outline: 3px solid #562912; outline-offset: 2px; border-color: #562912; }
