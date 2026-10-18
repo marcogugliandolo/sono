@@ -4,7 +4,7 @@ Web de SOÑO con carta, alérgenos, pedidos para llevar, galería, reservas de m
 
 - **Web pública**: portada, nosotros, carta por grupos (cada producto se abre en grande con sus alérgenos), pedidos para llevar (recoger en el local a la hora elegida, o a domicilio), galería, contacto y reservas en una ventana emergente.
 - **Panel**: se abre tocando el logo SOÑO de la cabecera y ocupa toda la pantalla. Desde ahí se crean, ordenan y borran los grupos de la carta; se cambian precios, productos, alérgenos, fotos, horarios y datos de contacto; se activan o desactivan los pedidos para llevar y la entrega a domicilio, y se ven las reservas, los pedidos (con su hora de recogida) y los mensajes que llegan.
-- **Marca**: logo SOÑO en vector (el café de la Ñ se mueve), colores del logo (marrón #562912 y crema #FFFDB3) y la tipografía Fredoka.
+- **Marca**: logo SOÑO en vector (el café de la Ñ se mueve), colores oficiales (marrón rgb(86, 41, 18) · #562912 y beige rgb(243, 224, 166) · #F3E0A6) y la tipografía Fredoka.
 - **Servidor**: Node.js sin dependencias. Guarda todo en la carpeta de datos (un volumen de Docker).
 
 ## Estructura
