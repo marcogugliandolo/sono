@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SOÑO · Cafetería</title>
+<meta name="description" content="SOÑO, cafetería de barrio: café, desayunos y buenos ratos. Mira la carta y reserva tu mesa.">
+<meta name="theme-color" content="#EAE52B">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SOÑO · Cafetería">
+<meta property="og:description" content="Café, desayunos y buenos ratos. Mira la carta y reserva tu mesa.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fuentes/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fuentes/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<!-- Dibujos reutilizables -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-luna" viewBox="0 0 100 100">
+      <path class="trazo" d="M62 20 A30 30 0 1 0 80 70 A36 36 0 0 1 62 20 Z"/>
+    </symbol>
+    <symbol id="i-estrella" viewBox="0 0 20 20">
+      <path class="trazo" d="M10 1 L12.4 7.6 L19 10 L12.4 12.4 L10 19 L7.6 12.4 L1 10 L7.6 7.6 Z"/>
+    </symbol>
+    <symbol id="i-cerrar" viewBox="0 0 20 20">
+      <path d="M4 4 L16 16 M16 4 L4 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-taza" viewBox="0 0 100 100">
+      <path class="trazo" d="M26 46 H74 C74 64 66 76 50 76 C34 76 26 64 26 46 Z"/>
+      <path class="trazo" d="M73 52 C84 50 88 60 80 66 C77 68 73 68 70 66"/>
+      <path class="trazo" d="M16 82 C36 74 64 74 84 82 C64 90 36 90 16 82 Z"/>
+      <path class="trazo vapor" d="M42 38 C38 32 46 28 42 20 C39 14 44 10 42 6"/>
+      <path class="trazo vapor vapor--b" d="M56 38 C52 32 60 28 56 20"/>
+    </symbol>
+    <symbol id="i-vaso" viewBox="0 0 100 100">
+      <path class="trazo" d="M29 30 H71"/>
+      <path class="trazo" d="M30 30 L34 82 C34 85 36 87 39 87 H61 C64 87 66 85 66 82 L70 30"/>
+      <path class="trazo" d="M32 44 C40 48 60 40 68 44"/>
+      <path class="trazo" d="M33 58 H67"/>
+      <path class="trazo vapor" d="M46 22 C43 17 49 14 46 9"/>
+      <path class="trazo vapor vapor--b" d="M56 22 C53 17 59 14 56 9"/>
+    </symbol>
+    <symbol id="i-vaso-alto" viewBox="0 0 100 100">
+      <path class="trazo" d="M31 14 H69"/>
+      <path class="trazo" d="M32 14 L36 86 C36 89 38 91 41 91 H59 C62 91 64 89 64 86 L68 14"/>
+      <path class="trazo" d="M33 30 C41 34 59 26 67 30"/>
+      <path class="trazo" d="M34 52 H66"/>
+      <path class="trazo" d="M35 68 C42 64 58 72 65 68"/>
+    </symbol>
+    <symbol id="i-coldbrew" viewBox="0 0 100 100">
+      <path class="trazo" d="M31 18 H69"/>
+      <path class="trazo" d="M32 18 L36 86 C36 89 38 91 41 91 H59 C62 91 64 89 64 86 L68 18"/>
+      <path class="trazo" d="M40 30 L49 27 L52 36 L43 39 Z"/>
+      <path class="trazo" d="M52 42 L61 40 L63 49 L54 51 Z"/>
+      <path class="trazo" d="M34 58 H66"/>
+      <path class="trazo" d="M58 4 L52 46"/>
+    </symbol>
+    <symbol id="i-cruasan" viewBox="0 0 100 100">
+      <path class="trazo" d="M10 62 C14 44 30 32 50 32 C70 32 86 44 90 62 C84 68 76 68 70 62 C64 70 36 70 30 62 C24 68 16 68 10 62 Z"/>
+      <path class="trazo" d="M30 62 C30 50 34 40 40 35"/>
+      <path class="trazo" d="M70 62 C70 50 66 40 60 35"/>
+      <path class="trazo" d="M50 33 C47 45 47 57 50 67"/>
+    </symbol>
+    <symbol id="i-tostada" viewBox="0 0 100 100">
+      <path class="trazo" d="M22 40 C18 26 30 16 50 16 C70 16 82 26 78 40 C76 44 72 45 72 48 V84 C72 87 70 89 67 89 H33 C30 89 28 87 28 84 V48 C28 45 24 44 22 40 Z"/>
+      <path class="trazo" d="M37 52 C43 48 55 56 63 52"/>
+      <path class="trazo" d="M37 64 C43 60 55 68 63 64"/>
+      <path class="trazo" d="M37 76 C43 72 55 80 63 76"/>
+    </symbol>
+    <symbol id="i-bol" viewBox="0 0 100 100">
+      <path class="trazo" d="M12 52 H88 C88 74 72 86 50 86 C28 86 12 74 12 52 Z"/>
+      <path class="trazo" d="M40 86 L42 92 H58 L60 86"/>
+      <circle class="trazo" cx="34" cy="44" r="7"/>
+      <circle class="trazo" cx="51" cy="40" r="8"/>
+      <circle class="trazo" cx="66" cy="45" r="5"/>
+      <path class="trazo vapor" d="M30 30 C27 25 33 22 30 17"/>
+      <path class="trazo vapor vapor--b" d="M70 32 C67 27 73 24 70 19"/>
+    </symbol>
+    <symbol id="i-bizcocho" viewBox="0 0 100 100">
+      <path class="trazo" d="M14 52 C14 40 26 32 50 32 C74 32 86 40 86 52 V78 C86 82 83 84 80 84 H20 C17 84 14 82 14 78 Z"/>
+      <path class="trazo" d="M28 42 C36 46 44 38 52 43 C58 46 64 40 72 44"/>
+      <path class="trazo" d="M38 54 V84"/>
+      <path class="trazo" d="M62 54 V84"/>
+    </symbol>
+    <symbol id="i-filtro" viewBox="0 0 100 100">
+      <path class="trazo" d="M22 26 H78"/>
+      <path class="trazo" d="M27 26 L42 52 H58 L73 26"/>
+      <path class="trazo" d="M40 32 L46 46 M60 32 L54 46"/>
+      <path class="trazo" d="M36 57 H64"/>
+      <path class="trazo vapor" d="M50 60 V63"/>
+      <path class="trazo" d="M33 67 H67 L64 84 C63 88 61 90 57 90 H43 C39 90 37 88 36 84 Z"/>
+    </symbol>
+    <symbol id="i-prensa" viewBox="0 0 100 100">
+      <path class="trazo" d="M36 10 H64"/>
+      <path class="trazo" d="M40 10 V30 M60 10 V30"/>
+      <path class="trazo" d="M34 30 H66 V66 H34 Z"/>
+      <path class="trazo" d="M40 42 H60"/>
+      <path class="trazo" d="M31 66 H69 L66 72 H34 Z"/>
+      <path class="trazo vapor" d="M50 75 V78"/>
+      <path class="trazo" d="M34 81 H66 L63 92 H37 Z"/>
+    </symbol>
+    <symbol id="i-chemex" viewBox="0 0 100 100">
+      <path class="trazo" d="M28 10 H72"/>
+      <path class="trazo" d="M29 10 L44 44 M71 10 L56 44"/>
+      <path class="trazo" d="M42 44 H58 V54 H42 Z"/>
+      <path class="trazo" d="M44 54 L26 84 C24 88 27 91 31 91 H69 C73 91 76 88 74 84 L56 54"/>
+      <path class="trazo" d="M33 74 H67"/>
+    </symbol>
+    <symbol id="i-camara" viewBox="0 0 100 100">
+      <path class="trazo" d="M18 34 H34 L40 26 H60 L66 34 H82 C85 34 88 37 88 40 V72 C88 75 85 78 82 78 H18 C15 78 12 75 12 72 V40 C12 37 15 34 18 34 Z"/>
+      <circle class="trazo" cx="50" cy="56" r="13"/>
+      <path class="trazo" d="M74 44 H76"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="banda banda--amarillo portada">
+  <div class="wrap">
+    <div class="cabecera">
+      <a class="boton boton--lleno boton--peque cabecera__reserva" href="#reservar" data-abrir-reserva>Reservar mesa</a>
+      <button class="marca" type="button" id="logo" aria-label="SOÑO. Acceso al panel de administración">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><g class="balancea"><use href="#i-luna"/></g></svg>
+        SOÑO
+      </button>
+      <nav class="menu" aria-label="Secciones">
+        <ul>
+          <li><a href="#nosotros">Nosotros</a></li>
+          <li><a href="#carta">Carta</a></li>
+          <li data-galeria hidden><a href="#galeria">Galería</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="hero" id="inicio">
+      <div class="hero__texto">
+        <p class="antetitulo">Cafetería de barrio</p>
+        <h1 class="hero__titulo"><span>Despierta</span> <span>tus sueños</span></h1>
+        <p class="hero__sub">Buen café y mejor ambiente para alegrarte el día.</p>
+        <div class="acciones">
+          <a class="boton boton--lleno" href="#reservar" data-abrir-reserva>Reservar mesa</a>
+          <a class="boton boton--borde" href="#carta">Ver la carta</a>
+        </div>
+      </div>
+
+      <div class="hero__panel">
+        <div class="pegatina" id="pegatina" role="img" aria-label="Abrimos pronto">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs><path id="circulo-pegatina" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs>
+            <circle class="fondo" cx="60" cy="60" r="58"/>
+            <g class="giro">
+              <text><textPath href="#circulo-pegatina" textLength="255" lengthAdjust="spacing">ABRIMOS PRONTO · ABRIMOS PRONTO ·</textPath></text>
+            </g>
+            <use href="#i-luna" x="38" y="38" width="44" height="44" style="--grosor:2.5"/>
+          </svg>
+        </div>
+        <svg viewBox="0 0 400 440" role="img" aria-label="Taza de café con el vapor subiendo hacia una luna y estrellas">
+          <path class="trazo" d="M48 384 C120 356 280 356 352 384 C280 412 120 412 48 384 Z"/>
+          <path class="trazo" d="M96 262 C130 278 270 278 304 262 C304 330 268 372 200 372 C132 372 96 330 96 262 Z"/>
+          <path class="trazo" d="M96 262 C130 246 270 246 304 262"/>
+          <path class="trazo" d="M302 284 C346 276 356 320 326 338 C314 345 298 344 288 338"/>
+          <path class="trazo vapor" d="M160 236 C142 208 178 190 160 162 C144 138 172 120 158 96"/>
+          <path class="trazo vapor vapor--b" d="M200 236 C184 204 218 186 200 150"/>
+          <path class="trazo vapor vapor--c" d="M240 236 C222 208 258 190 240 162 C230 148 236 138 232 130"/>
+          <g class="flota">
+            <use href="#i-luna" x="200" y="-4" width="150" height="150"/>
+            <use class="titila" href="#i-estrella" x="92" y="54" width="26" height="26"/>
+            <use class="titila titila--b" href="#i-estrella" x="336" y="146" width="18" height="18"/>
+            <use class="titila titila--c" href="#i-estrella" x="116" y="140" width="14" height="14"/>
+            <use class="titila titila--d" href="#i-estrella" x="196" y="28" width="12" height="12"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="banda banda--cafe" id="nosotros" aria-labelledby="t-nosotros">
+    <div class="wrap nosotros">
+      <div class="nosotros__titulo">
+        <p class="antetitulo">Nosotros</p>
+        <h2 class="titulo-serif" id="t-nosotros">Un rincón del barrio para soñar despierto con un buen café.</h2>
+      </div>
+      <div class="nosotros__texto">
+        <svg class="nosotros__dibujo" viewBox="0 0 200 170" aria-hidden="true">
+          <use href="#i-taza" x="30" y="40" width="140" height="130"/>
+          <g class="flota"><use href="#i-luna" x="88" y="-6" width="70" height="70"/></g>
+          <use class="titila" href="#i-estrella" x="40" y="10" width="14" height="14"/>
+        </svg>
+        <p class="destacado">Hecho con mimo.</p>
+        <p>Cada taza en SOÑO se prepara con calma y cariño: café rico, equilibrado y para disfrutar sin prisa.</p>
+        <hr class="separador">
+        <p>Del café recién hecho a la repostería casera, todo en SOÑO está pensado para crear momentos que merece la pena saborear sin prisa.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="banda banda--amarillo" id="carta" aria-labelledby="t-carta">
+    <div class="wrap">
+      <div class="carta__cabecera">
+        <div>
+          <p class="antetitulo">La carta</p>
+          <h2 class="titulo-serif" id="t-carta">Lo bueno, recién hecho</h2>
+        </div>
+        <p class="carta__nota">Toca cualquier producto para verlo en grande.</p>
+      </div>
+
+      <div class="carta">
+        <article class="carta__col">
+          <svg class="carta__icono" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-taza"/></svg>
+          <h3>Barra de espresso</h3>
+          <p class="carta__desc">Bebidas con siropes y especias caseras.</p>
+          <ul class="carta__lista" data-categoria="espresso"><li class="estado-vacio">Cargando la carta…</li></ul>
+        </article>
+
+        <article class="carta__col">
+          <svg class="carta__icono" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-cruasan"/></svg>
+          <h3>Desayunos</h3>
+          <p class="carta__desc">Bollería, tostadas y avena para acompañar.</p>
+          <ul class="carta__lista" data-categoria="desayunos"><li class="estado-vacio">Cargando la carta…</li></ul>
+        </article>
+
+        <article class="carta__col">
+          <svg class="carta__icono" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-filtro"/></svg>
+          <h3>Café de filtro</h3>
+          <p class="carta__desc">Cafés de origen que realzan cada matiz.</p>
+          <ul class="carta__lista" data-categoria="filtro"><li class="estado-vacio">Cargando la carta…</li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="banda banda--cafe" id="galeria" aria-labelledby="t-galeria" data-galeria hidden>
+    <div class="wrap">
+      <div class="galeria__cabecera">
+        <div>
+          <p class="antetitulo">Galería</p>
+          <h2 class="titulo-serif" id="t-galeria">Momentos SOÑO</h2>
+        </div>
+        <p class="intro">Un vistazo a la barra, el local y lo que sale de la cocina.</p>
+      </div>
+
+      <ul class="galeria" id="galeria-lista"></ul>
+
+      <div class="galeria__pie">
+        <p>¿Tienes una foto en SOÑO? Compártela en Instagram y etiquétanos.</p>
+        <span class="dato-instagram"><span class="pendiente">Instagram por confirmar</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="banda banda--amarillo" id="contacto" aria-labelledby="t-contacto">
+    <div class="wrap contacto">
+      <div class="contacto__info">
+        <p class="antetitulo">Visítanos</p>
+        <h2 class="titulo-serif" id="t-contacto">Escríbenos</h2>
+        <p>Eventos, pedidos para grupos o cualquier duda: te escuchamos.</p>
+        <dl class="datos">
+          <div><dt>Dirección</dt><dd id="dato-direccion"><span class="pendiente">Por confirmar</span></dd></div>
+          <div><dt>Horario</dt><dd id="dato-horario"><span class="pendiente">Por confirmar</span></dd></div>
+          <div><dt>Email</dt><dd id="dato-email"><span class="pendiente">Por confirmar</span></dd></div>
+          <div><dt>Teléfono</dt><dd id="dato-telefono"><span class="pendiente">Por confirmar</span></dd></div>
+        </dl>
+      </div>
+
+      <form class="formulario" id="formulario-contacto" novalidate>
+        <div class="trampa" aria-hidden="true"><label for="contacto-web">No rellenar</label><input id="contacto-web" name="web" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="campo">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" type="text" autocomplete="name" required>
+        </div>
+        <div class="campo">
+          <label for="correo">Email</label>
+          <input id="correo" name="correo" type="email" autocomplete="email" required>
+        </div>
+        <div class="campo">
+          <label for="mensaje">Mensaje</label>
+          <textarea id="mensaje" name="mensaje" required style="min-height:130px"></textarea>
+        </div>
+        <button class="boton boton--lleno" type="submit">Enviar mensaje</button>
+        <p class="aviso" id="aviso" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">
+  <div class="wrap">
+    <div class="pie__bloque">
+      <div>
+        <p class="pie__marca">SOÑO<svg viewBox="0 0 100 100" aria-hidden="true"><g class="balancea"><use href="#i-luna"/></g></svg></p>
+        <p class="pie__lema">Café, desayunos y buenos ratos.</p>
+      </div>
+      <div class="pie__columnas">
+        <div>
+          <h3>La web</h3>
+          <ul>
+            <li><a href="#reservar" data-abrir-reserva>Reservar mesa</a></li>
+            <li><a href="#carta">Carta</a></li>
+            <li data-galeria hidden><a href="#galeria">Galería</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Síguenos</h3>
+          <ul>
+            <li class="dato-instagram"><span class="pendiente">Instagram por confirmar</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="pie__legal">© 2026 SOÑO</p>
+  </div>
+</footer>
+
+<!-- Ventana: reservar mesa -->
+<dialog class="modal modal--reserva" id="modal-reserva" aria-labelledby="t-reserva">
+  <div class="modal__barra">
+    <div>
+      <p class="antetitulo">Reservas</p>
+      <h2 class="modal__titulo" id="t-reserva">Reserva tu mesa</h2>
+    </div>
+    <button class="modal__cerrar" type="button" data-cerrar aria-label="Cerrar reservas"><svg viewBox="0 0 20 20" aria-hidden="true"><use href="#i-cerrar"/></svg></button>
+  </div>
+
+  <div class="reserva">
+    <form id="form-reserva" novalidate>
+      <div>
+        <div class="trampa" aria-hidden="true"><label for="reserva-web">No rellenar</label><input id="reserva-web" name="web" type="text" tabindex="-1" autocomplete="off"></div>
+        <p>Elige el día, la hora y cuántos vais a venir. Te guardamos el sitio.</p>
+
+        <fieldset>
+          <legend>Día</legend>
+          <div class="dias" id="dias"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Hora</legend>
+          <p class="reserva__grupo-horas">Mañana</p>
+          <div class="horas" id="horas-manana"></div>
+          <p class="reserva__grupo-horas">Tarde</p>
+          <div class="horas" id="horas-tarde"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Personas</legend>
+          <div class="personas">
+            <button class="paso" type="button" id="menos" aria-label="Una persona menos">−</button>
+            <output id="personas" aria-live="polite">2</output>
+            <button class="paso" type="button" id="mas" aria-label="Una persona más">+</button>
+            <span class="ayuda">Máximo 8 por reserva</span>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Tus datos</legend>
+          <div class="campos-dos">
+            <div class="campo">
+              <label for="reserva-nombre">Nombre</label>
+              <input id="reserva-nombre" name="nombre" type="text" autocomplete="name" required>
+            </div>
+            <div class="campo">
+              <label for="reserva-telefono">Teléfono</label>
+              <input id="reserva-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" required>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="reserva-notas">Comentarios (opcional)</label>
+            <textarea id="reserva-notas" name="notas" placeholder="Trona para un bebé, mesa junto a la ventana…" style="min-height:90px"></textarea>
+          </div>
+        </fieldset>
+
+        <div class="reserva__resumen">
+          <p id="resumen">Mesa para 2</p>
+          <button class="boton boton--lleno" type="submit">Reservar mesa</button>
+        </div>
+        <p class="aviso" id="aviso-reserva" aria-live="polite"></p>
+      </div>
+    </form>
+
+    <div class="confirmacion" id="confirmacion" hidden>
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-taza"/></svg>
+      <h3>¡Reserva recibida!</h3>
+      <p class="detalle" id="confirmacion-detalle"></p>
+      <p class="demo">Te esperamos. Si surge cualquier problema, te llamaremos al teléfono que nos has dejado.</p>
+      <div class="acciones">
+        <button class="boton boton--lleno" type="button" data-cerrar>Listo</button>
+        <button class="boton boton--borde" type="button" id="otra-reserva">Hacer otra reserva</button>
+      </div>
+    </div>
+
+    <ul class="reserva__notas">
+      <li>Grupos de más de 8 personas: escríbenos y lo organizamos.</li>
+      <li>Para cambiar o cancelar una reserva, escríbenos desde la sección de contacto.</li>
+    </ul>
+  </div>
+</dialog>
+
+<!-- Ventana: producto ampliado -->
+<dialog class="modal modal--producto" id="modal-producto" aria-labelledby="producto-nombre">
+  <div class="producto">
+    <button class="modal__cerrar" type="button" data-cerrar aria-label="Cerrar producto"><svg viewBox="0 0 20 20" aria-hidden="true"><use href="#i-cerrar"/></svg></button>
+    <div class="producto__visual" id="producto-visual">
+      <svg class="adorno adorno--a titila" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-estrella"/></svg>
+      <svg class="adorno adorno--b titila titila--b" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-estrella"/></svg>
+      <svg class="adorno adorno--c titila titila--c" viewBox="0 0 20 20" aria-hidden="true"><use href="#i-estrella"/></svg>
+      <svg class="dibujo" id="producto-dibujo" viewBox="0 0 100 100" role="img" aria-label=""><use id="producto-icono" href="#i-taza"/></svg>
+      <img id="producto-img" alt="" hidden>
+    </div>
+    <div class="producto__info">
+      <p class="antetitulo" id="producto-categoria"></p>
+      <h3 class="producto__nombre" id="producto-nombre"></h3>
+      <p class="producto__precio" id="producto-precio"></p>
+      <p class="producto__desc" id="producto-desc"></p>
+      <ul class="producto__etiquetas" id="producto-etiquetas"></ul>
+      <div class="producto__nav">
+        <button class="boton boton--borde boton--peque" type="button" id="producto-anterior" aria-label="Producto anterior">‹ Anterior</button>
+        <button class="boton boton--borde boton--peque" type="button" id="producto-siguiente" aria-label="Producto siguiente">Siguiente ›</button>
+        <span class="producto__cuenta" id="producto-cuenta"></span>
+        <a class="boton boton--lleno boton--peque" href="#reservar" data-abrir-reserva>Reservar mesa</a>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Ventana: acceso al panel -->
+<dialog class="modal modal--login" id="modal-login" aria-labelledby="t-login">
+  <div class="login">
+    <button class="modal__cerrar" type="button" data-cerrar aria-label="Cerrar acceso"><svg viewBox="0 0 20 20" aria-hidden="true"><use href="#i-cerrar"/></svg></button>
+    <svg class="login__luna" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-luna"/></svg>
+    <div>
+      <p class="antetitulo">Panel de SOÑO</p>
+      <h2 class="modal__titulo" id="t-login">Entrar</h2>
+    </div>
+    <form id="form-login" novalidate>
+      <div class="campo">
+        <label for="login-usuario">Usuario</label>
+        <input id="login-usuario" name="usuario" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </div>
+      <div class="campo">
+        <label for="login-clave">Contraseña</label>
+        <input id="login-clave" name="clave" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="boton boton--lleno" type="submit">Entrar al panel</button>
+      <p class="aviso" id="aviso-login" aria-live="polite"></p>
+    </form>
+  </div>
+</dialog>
+
+<!-- Ventana: panel de administración -->
+<dialog class="modal modal--admin" id="modal-admin" aria-labelledby="t-admin">
+  <div class="admin__cabecera">
+    <div class="admin__fila">
+      <div>
+        <p class="antetitulo">Panel de SOÑO</p>
+        <h2 class="admin__titulo" id="t-admin">Editar la web</h2>
+      </div>
+      <div class="admin__herramientas">
+        <button class="boton boton--borde boton--mini" type="button" id="cerrar-sesion">Cerrar sesión</button>
+        <button class="modal__cerrar" type="button" data-cerrar aria-label="Cerrar panel"><svg viewBox="0 0 20 20" aria-hidden="true"><use href="#i-cerrar"/></svg></button>
+      </div>
+    </div>
+    <div class="admin__pestanas" role="tablist" aria-label="Secciones del panel">
+      <button class="pestana" type="button" role="tab" id="tab-carta" data-pestana="carta" aria-controls="admin-cuerpo" aria-selected="true">Carta</button>
+      <button class="pestana" type="button" role="tab" id="tab-fotos" data-pestana="fotos" aria-controls="admin-cuerpo" aria-selected="false" tabindex="-1">Fotos</button>
+      <button class="pestana" type="button" role="tab" id="tab-horarios" data-pestana="horarios" aria-controls="admin-cuerpo" aria-selected="false" tabindex="-1">Horarios</button>
+      <button class="pestana" type="button" role="tab" id="tab-datos" data-pestana="datos" aria-controls="admin-cuerpo" aria-selected="false" tabindex="-1">Contacto</button>
+      <button class="pestana" type="button" role="tab" id="tab-reservas" data-pestana="reservas" aria-controls="admin-cuerpo" aria-selected="false" tabindex="-1">Reservas</button>
+      <button class="pestana" type="button" role="tab" id="tab-mensajes" data-pestana="mensajes" aria-controls="admin-cuerpo" aria-selected="false" tabindex="-1">Mensajes</button>
+    </div>
+  </div>
+  <p class="admin__aviso" id="admin-aviso" hidden></p>
+  <div class="admin__cuerpo" id="admin-cuerpo" role="tabpanel" aria-labelledby="tab-carta"></div>
+  <div class="admin__pie">
+    <p class="admin__estado" id="admin-estado" aria-live="polite"></p>
+    <button class="boton boton--borde boton--peque" type="button" id="admin-descartar">Descartar cambios</button>
+    <button class="boton boton--lleno boton--peque" type="button" id="admin-guardar">Guardar cambios</button>
+  </div>
+</dialog>
+</body>
+</html>

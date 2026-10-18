@@ -1,0 +1,89 @@
+# SOÑO · web de la cafetería
+
+Web de SOÑO con carta, galería, reservas de mesa, formulario de contacto y un panel para editarlo todo sin tocar código.
+
+- **Web pública**: portada, nosotros, carta (cada producto se abre en grande), galería, contacto y reservas en una ventana emergente.
+- **Panel**: se abre tocando el logo SOÑO de la cabecera. Desde ahí se cambian precios, productos, fotos, horarios y datos de contacto, y se ven las reservas y los mensajes que llegan.
+- **Servidor**: Node.js sin dependencias. Guarda todo en la carpeta de datos (un volumen de Docker).
+
+## Estructura
+
+```
+server.js              servidor web y API
+datos-iniciales.json   carta y horarios de partida (solo se usan el primer arranque)
+public/                la web: index.html, styles.css, app.js, tipografías
+Dockerfile             imagen de la web
+docker-compose.yml     stack para Portainer
+.github/workflows/     construye la imagen y la publica en GitHub Container Registry
+```
+
+## Variables de entorno
+
+| Variable | Para qué sirve | Valor por defecto |
+|---|---|---|
+| `ADMIN_PASSWORD` | Contraseña del panel. **Obligatoria**. | — |
+| `ADMIN_USER` | Usuario del panel | `soño` (también vale `sono`) |
+| `PUERTO` | Puerto del servidor donde se publica la web | `8080` |
+| `TRUST_PROXY` | `true` si la web va detrás de un proxy (Nginx Proxy Manager, Traefik, Cloudflare Tunnel) | `true` |
+| `COOKIE_SECURE` | `auto` marca la sesión como segura cuando la web va por HTTPS | `auto` |
+
+## Probar en tu ordenador
+
+Necesitas Node.js 20 o superior.
+
+```bash
+ADMIN_PASSWORD=2026 node server.js
+```
+
+Abre http://localhost:3000. Los datos se guardan en la carpeta `data/`.
+
+## Publicar en el servidor con Portainer
+
+### 1. La imagen se construye sola
+
+Cada vez que se sube un cambio a la rama `main`, GitHub Actions construye la imagen para x86 y ARM (vale para Contabo, Oracle y las Raspberry Pi) y la publica en `ghcr.io/marcogugliandolo/sono:latest`. Puedes ver el progreso en la pestaña **Actions** del repositorio.
+
+La primera vez, haz pública la imagen para que Portainer pueda descargarla sin contraseña: en GitHub ve a tu perfil → **Packages** → **sono** → **Package settings** → **Change visibility** → **Public**.
+
+### 2. Crear el stack
+
+En Portainer, dentro del entorno donde quieras la web:
+
+1. **Stacks** → **Add stack**, con nombre `sono`.
+2. Método **Repository**:
+   - Repository URL: la URL de este repositorio
+   - Reference: `refs/heads/main`
+   - Compose path: `docker-compose.yml`
+3. En **Environment variables** añade `ADMIN_PASSWORD` (y si quieres `PUERTO`).
+4. **Deploy the stack**.
+
+La web queda en `http://IP-DEL-SERVIDOR:8080`. Para un dominio con HTTPS, apunta tu proxy (por ejemplo Nginx Proxy Manager) a ese puerto.
+
+### 3. Actualizar después de un cambio
+
+1. Sube el cambio a `main` y espera a que termine la acción en **Actions** (marca verde).
+2. En Portainer, abre el stack y pulsa **Pull and redeploy** con la opción de volver a descargar la imagen activada.
+
+Los datos (carta, fotos, reservas) viven en el volumen y no se pierden al actualizar.
+
+## Copia de seguridad
+
+Todo está en el volumen del stack (Portainer lo llama `sono_sono_datos`): `contenido.json`, `reservas.json`, `mensajes.json` y la carpeta `fotos/`.
+
+```bash
+docker run --rm -v sono_sono_datos:/datos -v "$PWD":/copia alpine \
+  tar czf /copia/sono-copia-$(date +%F).tgz -C /datos .
+```
+
+## Seguridad
+
+- El panel pide usuario y contraseña al servidor; la contraseña no está en el código de la web.
+- Tras 5 intentos fallidos desde la misma IP, el acceso se bloquea 15 minutos.
+- La sesión dura 12 horas y la cookie solo la puede leer el servidor.
+- Las fotos se comprueban (solo JPG, PNG o WebP, hasta 10 MB) y el navegador las reduce antes de subirlas.
+- Las reservas y los mensajes tienen límite de envíos por IP y una trampa para bots.
+- Usa una contraseña larga en `ADMIN_PASSWORD`, sobre todo si la web es pública.
+
+## Tipografías
+
+Bricolage Grotesque y Newsreader, alojadas en `public/fuentes` con su licencia SIL Open Font License. No se cargan desde Google, así que la web no hace peticiones a terceros.

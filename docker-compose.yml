@@ -1,0 +1,25 @@
+# Stack de Portainer para SOÑO
+# La imagen la construye GitHub Actions en cada cambio de la rama main.
+# Variables que hay que poner en Portainer (Environment variables del stack):
+#   ADMIN_PASSWORD  contraseña del panel (obligatoria)
+#   ADMIN_USER      usuario del panel (por defecto: soño)
+#   PUERTO          puerto del servidor donde se publica la web (por defecto: 8080)
+
+services:
+  sono:
+    image: ghcr.io/marcogugliandolo/sono:latest
+    container_name: sono-web
+    restart: unless-stopped
+    environment:
+      ADMIN_USER: ${ADMIN_USER:-soño}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Falta ADMIN_PASSWORD en las variables del stack}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-auto}
+      TZ: Europe/Madrid
+    ports:
+      - "${PUERTO:-8080}:3000"
+    volumes:
+      - sono_datos:/app/data
+
+volumes:
+  sono_datos:
