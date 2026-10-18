@@ -15,13 +15,13 @@ img { max-width: 100%; }
 [hidden] { display: none !important; }
 /* Layout: bandas a todo el ancho que alternan amarillo y marrón (como la plantilla), contenido en una columna de 1180px; reservas, productos y panel de administración en ventanas emergentes */
 :root {
-  /* Colores del logo: marrón chocolate #562912 y crema #FFFDB3 */
-  --acento: #FFFDB3;
-  --fondo: #FFFDB3;
-  --amarillo-palido: #F7F1C4;
+  /* Colores oficiales de SOÑO: marrón rgb(86, 41, 18) y beige rgb(243, 224, 166) */
+  --acento: #F3E0A6;
+  --fondo: #F3E0A6;
+  --amarillo-palido: #F8ECCA;
   --cafe: #562912;
   --cafe-claro: #6B3B22;
-  --cafe-leche: #8A6446;
+  --cafe-leche: #7A5539;
   --linea-sobre-cafe: #9D8256;
   --linea-sobre-amarillo: #A88B62;
   --alerta: #F4A882;
