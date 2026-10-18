@@ -328,8 +328,6 @@ function validarDatos(d) {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw errorCliente('Revisa el email de contacto.');
   const instagram = texto(d.instagram, 40).replace(/^@/, '');
   if (instagram && !/^[A-Za-z0-9._]{1,30}$/.test(instagram)) throw errorCliente('El usuario de Instagram solo puede tener letras, números, puntos y guiones bajos.');
-  const pinterest = texto(d.pinterest, 40).replace(/^@/, '');
-  if (pinterest && !/^[A-Za-z0-9_]{3,30}$/.test(pinterest)) throw errorCliente('El usuario de Pinterest solo puede tener letras, números y guiones bajos.');
   const whatsapp = texto(d.whatsapp, 25);
   if (whatsapp && whatsapp.replace(/[^\d]/g, '').length < 9) throw errorCliente('Revisa el WhatsApp: escribe el número de teléfono, con al menos 9 cifras.');
   return {
@@ -337,7 +335,6 @@ function validarDatos(d) {
     email,
     telefono: texto(d.telefono, 30),
     instagram,
-    pinterest,
     whatsapp,
     abrimosPronto: d.abrimosPronto !== false,
     paraLlevar: d.paraLlevar !== false,

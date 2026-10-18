@@ -1247,7 +1247,7 @@ input:focus-visible + .alergeno-chip { outline: 3px solid var(--acento); outline
 }
 .dato-instagram .icono-red { width: 28px; height: 28px; }
 .icono-red--instagram { --icono: url("/img/red-instagram.png"); }
-.icono-red--pinterest { --icono: url("/img/red-pinterest.png"); }
+.icono-red--llamar { --icono: url("/img/red-llamar.svg"); }
 .icono-red--whatsapp { --icono: url("/img/red-whatsapp.png"); }
 
 /* Enlaces sin subrayar */
