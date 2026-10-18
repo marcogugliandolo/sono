@@ -32,9 +32,6 @@ const MAX_MENSAJES = 1000;
 const MAX_PEDIDOS = 3000;
 
 const MAX_GRUPOS = 12;
-/* Temas de color (guía de marca). El nombre es el color de fondo principal. */
-const TEMAS = ['beige', 'marron', 'lila'];
-const COLOR_TEMA = { beige: '#F3E0A6', marron: '#562912', lila: '#C9ADFF' };
 const ICONOS = ['taza', 'vaso', 'vaso-alto', 'coldbrew', 'cruasan', 'tostada', 'bol', 'bizcocho', 'filtro', 'prensa', 'chemex', 'llevar'];
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const ALERGENOS = ['gluten', 'crustaceos', 'huevos', 'pescado', 'cacahuetes', 'soja', 'lacteos', 'frutos', 'apio', 'mostaza', 'sesamo', 'sulfitos', 'altramuces', 'moluscos'];
@@ -226,8 +223,6 @@ async function completarContenido() {
     cambiado = true;
   }
   if (contenido.datos.paraLlevar === undefined) { contenido.datos.paraLlevar = true; cambiado = true; }
-  if (!TEMAS.includes(contenido.datos.tema)) { contenido.datos.tema = 'beige'; cambiado = true; }
-  if (!TEMAS.includes(contenido.datos.temaPanel)) { contenido.datos.temaPanel = 'marron'; cambiado = true; }
   if (contenido.datos.domicilio === undefined) { contenido.datos.domicilio = true; cambiado = true; }
   if (cambiado) await guardarArchivo('contenido.json', contenido);
 }
@@ -340,9 +335,7 @@ function validarDatos(d) {
     instagram,
     abrimosPronto: d.abrimosPronto !== false,
     paraLlevar: d.paraLlevar !== false,
-    domicilio: d.domicilio !== false,
-    tema: TEMAS.includes(d.tema) ? d.tema : 'beige',
-    temaPanel: TEMAS.includes(d.temaPanel) ? d.temaPanel : 'marron'
+    domicilio: d.domicilio !== false
   };
 }
 
@@ -477,32 +470,10 @@ async function servirArchivo(req, res, ruta, cache) {
   return true;
 }
 
-/* La portada sale ya con el tema elegido en el panel, para que no parpadee al cargar */
-let portadaCache = null;
-async function servirPortada(req, res) {
-  const ruta = path.join(DIR_PUBLICO, 'index.html');
-  const info = await fsp.stat(ruta);
-  if (!portadaCache || portadaCache.mtime !== info.mtimeMs) {
-    portadaCache = { mtime: info.mtimeMs, html: await fsp.readFile(ruta, 'utf8') };
-  }
-  const tema = TEMAS.includes(contenido.datos.tema) ? contenido.datos.tema : 'beige';
-  const html = portadaCache.html
-    .replace('<html lang="es">', '<html lang="es" data-tema="' + tema + '">')
-    .replace(/<meta name="theme-color" content="[^"]*">/, '<meta name="theme-color" content="' + COLOR_TEMA[tema] + '">');
-  const cuerpo = Buffer.from(html, 'utf8');
-  const etag = 'W/"' + cuerpo.length.toString(16) + '-' + Math.floor(info.mtimeMs).toString(16) + '-' + tema + '"';
-  res.setHeader('ETag', etag);
-  res.setHeader('Cache-Control', 'no-cache');
-  if (req.headers['if-none-match'] === etag) { res.writeHead(304); res.end(); return true; }
-  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': cuerpo.length });
-  res.end(req.method === 'HEAD' ? undefined : cuerpo);
-  return true;
-}
-
 async function servirPublico(req, res, pathname) {
   let relativa;
   try { relativa = decodeURIComponent(pathname); } catch (e) { return false; }
-  if (relativa === '/' || relativa === '' || relativa === '/index.html') return servirPortada(req, res);
+  if (relativa === '/' || relativa === '') relativa = '/index.html';
   const ruta = path.normalize(path.join(DIR_PUBLICO, relativa));
   if (!ruta.startsWith(DIR_PUBLICO + path.sep)) return false;
   const ext = path.extname(ruta).toLowerCase();
@@ -763,7 +734,7 @@ async function atender(req, res) {
 
   /* Cualquier otra ruta muestra la portada, sin cambiar de URL */
   if (!path.extname(pathname)) {
-    if (await servirPortada(req, res)) return;
+    if (await servirArchivo(req, res, path.join(DIR_PUBLICO, 'index.html'), 'no-cache')) return;
   }
   enviarTexto(res, 404, 'No encontrado');
 }
