@@ -31,9 +31,8 @@ const MAX_RESERVAS = 3000;
 const MAX_MENSAJES = 1000;
 const MAX_PEDIDOS = 3000;
 
-const CATEGORIAS = ['espresso', 'desayunos', 'filtro'];
-const ICONO_CAT = { espresso: 'taza', desayunos: 'cruasan', filtro: 'filtro' };
-const ICONOS = ['taza', 'vaso', 'vaso-alto', 'coldbrew', 'cruasan', 'tostada', 'bol', 'bizcocho', 'filtro', 'prensa', 'chemex'];
+const MAX_GRUPOS = 12;
+const ICONOS = ['taza', 'vaso', 'vaso-alto', 'coldbrew', 'cruasan', 'tostada', 'bol', 'bizcocho', 'filtro', 'prensa', 'chemex', 'llevar'];
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const ALERGENOS = ['gluten', 'crustaceos', 'huevos', 'pescado', 'cacahuetes', 'soja', 'lacteos', 'frutos', 'apio', 'mostaza', 'sesamo', 'sulfitos', 'altramuces', 'moluscos'];
 
@@ -218,6 +217,11 @@ async function completarContenido() {
       cambiado = true;
     }
   });
+  if (!Array.isArray(contenido.carta.categorias)) {
+    // Versiones anteriores tenían los tres grupos fijos en el código
+    contenido.carta.categorias = inicial.carta.categorias.map((g) => Object.assign({}, g));
+    cambiado = true;
+  }
   if (contenido.datos.paraLlevar === undefined) { contenido.datos.paraLlevar = true; cambiado = true; }
   if (contenido.datos.domicilio === undefined) { contenido.datos.domicilio = true; cambiado = true; }
   if (cambiado) await guardarArchivo('contenido.json', contenido);
@@ -239,17 +243,31 @@ function normPrecio(v) {
 
 function validarCarta(c) {
   const lista = c && Array.isArray(c.productos) ? c.productos : null;
-  if (!lista) throw errorCliente('La carta no tiene el formato esperado.');
+  const grupos = c && Array.isArray(c.categorias) ? c.categorias : null;
+  if (!lista || !grupos) throw errorCliente('La carta no tiene el formato esperado.');
+  if (grupos.length > MAX_GRUPOS) throw errorCliente('Hay demasiados grupos en la carta (máximo ' + MAX_GRUPOS + ').');
   if (lista.length > 150) throw errorCliente('Hay demasiados productos en la carta (máximo 150).');
+  const iconoDe = new Map();
+  const categorias = grupos.map((g) => {
+    if (!g || typeof g !== 'object') throw errorCliente('Hay un grupo con un formato no válido.');
+    const id = String(g.id || '');
+    if (!RE_ID.test(id) || iconoDe.has(id)) throw errorCliente('Hay un grupo con un identificador repetido o no válido.');
+    const nombre = texto(g.nombre, 40);
+    if (!nombre) throw errorCliente('Hay un grupo de la carta sin nombre.');
+    const icono = ICONOS.includes(g.icono) ? g.icono : 'taza';
+    iconoDe.set(id, icono);
+    return { id, nombre, desc: texto(g.desc, 120), icono };
+  });
   const vistos = new Set();
   return {
+    categorias,
     productos: lista.map((p) => {
       if (!p || typeof p !== 'object') throw errorCliente('Hay un producto con un formato no válido.');
       const id = String(p.id || '');
       if (!RE_ID.test(id) || vistos.has(id)) throw errorCliente('Hay un producto con un identificador repetido o no válido.');
       vistos.add(id);
-      const cat = CATEGORIAS.includes(p.cat) ? p.cat : null;
-      if (!cat) throw errorCliente('Hay un producto en una sección que no existe.');
+      const cat = iconoDe.has(p.cat) ? p.cat : null;
+      if (!cat) throw errorCliente('Hay un producto en un grupo que ya no existe.');
       const nombre = texto(p.nombre, 80);
       if (!nombre) throw errorCliente('Hay un producto sin nombre.');
       const precioTexto = texto(p.precio, 10);
@@ -262,7 +280,7 @@ function validarCarta(c) {
         nombre,
         precio: normPrecio(precioTexto),
         desc: textoLargo(p.desc, 400),
-        icono: ICONOS.includes(p.icono) ? p.icono : ICONO_CAT[cat],
+        icono: ICONOS.includes(p.icono) ? p.icono : iconoDe.get(cat),
         etiquetas,
         alergenos: ALERGENOS.filter((a) => Array.isArray(p.alergenos) && p.alergenos.includes(a)),
         foto: validarFoto(p.foto)
@@ -590,6 +608,22 @@ async function api(req, res, pathname) {
     if (telefono.replace(/[^\d]/g, '').length < 9) throw errorCliente('Revisa el teléfono: necesitamos al menos 9 cifras para avisarte.');
     const direccion = tipo === 'domicilio' ? texto(datos.direccion, 160) : '';
     if (tipo === 'domicilio' && direccion.length < 5) throw errorCliente('Escribe la dirección de entrega.');
+    // Hora de recogida: una de las horas del horario, de hoy a pasado mañana y que no haya pasado ya
+    let recogida = null;
+    const horasLocal = [...new Set(contenido.horario.manana.concat(contenido.horario.tarde))];
+    if (tipo === 'recoger' && horasLocal.length) {
+      const r = datos.recogida && typeof datos.recogida === 'object' ? datos.recogida : {};
+      const fecha = String(r.fecha || '');
+      const hora = String(r.hora || '');
+      if (!RE_FECHA.test(fecha) || fecha < hoyISO(0) || fecha > hoyISO(2)) throw errorCliente('Elige qué día pasas a recogerlo: hoy, mañana o pasado mañana.');
+      if (!horasLocal.includes(hora)) throw errorCliente('Elige a qué hora pasas a recogerlo.');
+      if (fecha === hoyISO(0)) {
+        const ahora = new Date();
+        const [hh, mm] = hora.split(':').map(Number);
+        if (hh * 60 + mm < ahora.getHours() * 60 + ahora.getMinutes() + 5) throw errorCliente('Esa hora de recogida ya ha pasado. Elige otra un poco más tarde.');
+      }
+      recogida = { fecha, hora };
+    }
     const entrada = Array.isArray(datos.lineas) ? datos.lineas.slice(0, 20) : [];
     const cantidades = new Map();
     for (const l of entrada) {
@@ -620,14 +654,15 @@ async function api(req, res, pathname) {
       nombre,
       telefono,
       direccion,
+      recogida,
       lineas,
       total,
       notas: textoLargo(datos.notas, 500)
     };
     pedidos.unshift(pedido);
     await guardarArchivo('pedidos.json', pedidos);
-    console.log('[soño] Nuevo pedido:', tipo, total + ' €');
-    return enviarJSON(res, 201, { ok: true, total, lineas });
+    console.log('[soño] Nuevo pedido:', tipo, recogida ? recogida.fecha + ' ' + recogida.hora : '', total + ' €');
+    return enviarJSON(res, 201, { ok: true, total, lineas, recogida });
   }
 
   if (pathname === '/api/pedidos' && metodo === 'GET') {

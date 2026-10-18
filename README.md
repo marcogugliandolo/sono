@@ -2,8 +2,9 @@
 
 Web de SOÑO con carta, alérgenos, pedidos para llevar, galería, reservas de mesa, formulario de contacto y un panel para editarlo todo sin tocar código.
 
-- **Web pública**: portada, nosotros, carta (cada producto se abre en grande con sus alérgenos), pedidos para llevar (recoger en el local o a domicilio), galería, contacto y reservas en una ventana emergente.
-- **Panel**: se abre tocando el logo SOÑO de la cabecera y ocupa toda la pantalla. Desde ahí se cambian precios, productos, alérgenos, fotos, horarios y datos de contacto; se activan o desactivan los pedidos para llevar y la entrega a domicilio, y se ven las reservas, los pedidos y los mensajes que llegan.
+- **Web pública**: portada, nosotros, carta por grupos (cada producto se abre en grande con sus alérgenos), pedidos para llevar (recoger en el local a la hora elegida, o a domicilio), galería, contacto y reservas en una ventana emergente.
+- **Panel**: se abre tocando el logo SOÑO de la cabecera y ocupa toda la pantalla. Desde ahí se crean, ordenan y borran los grupos de la carta; se cambian precios, productos, alérgenos, fotos, horarios y datos de contacto; se activan o desactivan los pedidos para llevar y la entrega a domicilio, y se ven las reservas, los pedidos (con su hora de recogida) y los mensajes que llegan.
+- **Marca**: logo SOÑO en vector (el café de la Ñ se mueve), colores del logo (marrón #562912 y crema #FFFDB3) y la tipografía Fredoka.
 - **Servidor**: Node.js sin dependencias. Guarda todo en la carpeta de datos (un volumen de Docker).
 
 ## Estructura
@@ -100,6 +101,12 @@ docker run --rm -v sono_sono_datos:/datos -v "$PWD":/copia alpine \
 Los 14 alérgenos de declaración obligatoria (Reglamento UE 1169/2011) se marcan en cada producto desde el panel, pestaña **Carta**. Los que trae la carta de ejemplo son orientativos: revisadlos con vuestras recetas y proveedores antes de abrir.
 - Usa una contraseña larga en `ADMIN_PASSWORD`, sobre todo si la web es pública.
 
-## Tipografías
+## Tipografía e iconos
 
-Bricolage Grotesque y Newsreader, alojadas en `public/fuentes` con su licencia SIL Open Font License. No se cargan desde Google, así que la web no hace peticiones a terceros.
+Fredoka, la misma letra redondeada del logo, alojada en `public/fuentes` con su licencia SIL Open Font License. No se carga desde Google, así que la web no hace peticiones a terceros.
+
+El icono de la pestaña (`favicon.ico`, `favicon.svg` y `apple-touch-icon.png`) es el logo.
+
+## Horas de recogida
+
+Los pedidos para recoger se pueden programar para hoy, mañana o pasado mañana, en las mismas horas que las reservas (pestaña **Horarios** del panel). Si no hay horas puestas, el pedido se envía sin hora y se acuerda por teléfono.

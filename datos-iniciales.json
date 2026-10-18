@@ -1,5 +1,25 @@
 {
   "carta": {
+    "categorias": [
+      {
+        "id": "espresso",
+        "nombre": "Barra de espresso",
+        "desc": "Bebidas con siropes y especias caseras.",
+        "icono": "taza"
+      },
+      {
+        "id": "desayunos",
+        "nombre": "Desayunos",
+        "desc": "Bollería, tostadas y avena para acompañar.",
+        "icono": "cruasan"
+      },
+      {
+        "id": "filtro",
+        "nombre": "Café de filtro",
+        "desc": "Cafés de origen que realzan cada matiz.",
+        "icono": "filtro"
+      }
+    ],
     "productos": [
       {
         "id": "p01",
