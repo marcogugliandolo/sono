@@ -39,13 +39,24 @@ Abre http://localhost:3000. Los datos se guardan en la carpeta `data/`.
 
 ## Publicar en el servidor con Portainer
 
-### 1. La imagen se construye sola
+### Opción A · Web editor (la más sencilla)
+
+1. En Portainer: **Stacks** → **Add stack**, nombre `sono`, método **Web editor**.
+2. Pega el contenido de `stack-portainer.yml`.
+3. Cambia `ADMIN_PASSWORD` y, si el puerto 3070 está ocupado, el puerto de la izquierda en `ports`.
+4. **Deploy the stack**.
+
+En cada arranque el contenedor descarga la última versión de `main` desde GitHub, así que para actualizar la web basta con subir los cambios y reiniciar el contenedor desde Portainer. Los datos se guardan en el volumen `sono_datos` y no se pierden.
+
+### Opción B · Imagen ya construida en GitHub
+
+#### 1. La imagen se construye sola
 
 Cada vez que se sube un cambio a la rama `main`, GitHub Actions construye la imagen para x86 y ARM (vale para Contabo, Oracle y las Raspberry Pi) y la publica en `ghcr.io/marcogugliandolo/sono:latest`. Puedes ver el progreso en la pestaña **Actions** del repositorio.
 
 La primera vez, haz pública la imagen para que Portainer pueda descargarla sin contraseña: en GitHub ve a tu perfil → **Packages** → **sono** → **Package settings** → **Change visibility** → **Public**.
 
-### 2. Crear el stack
+#### 2. Crear el stack
 
 En Portainer, dentro del entorno donde quieras la web:
 
@@ -59,7 +70,7 @@ En Portainer, dentro del entorno donde quieras la web:
 
 La web queda en `http://IP-DEL-SERVIDOR:8080`. Para un dominio con HTTPS, apunta tu proxy (por ejemplo Nginx Proxy Manager) a ese puerto.
 
-### 3. Actualizar después de un cambio
+#### 3. Actualizar después de un cambio
 
 1. Sube el cambio a `main` y espera a que termine la acción en **Actions** (marca verde).
 2. En Portainer, abre el stack y pulsa **Pull and redeploy** con la opción de volver a descargar la imagen activada.
