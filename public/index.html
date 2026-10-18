@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SOÑO · Cafetería</title>
+<title>SOÑO</title>
 <meta name="description" content="SOÑO: café, desayunos y buenos ratos. Mira la carta, reserva tu mesa o pide para llevar.">
 <meta name="theme-color" content="#F3E0A6">
 <meta property="og:type" content="website">
-<meta property="og:title" content="SOÑO · Cafetería">
+<meta property="og:title" content="SOÑO">
 <meta property="og:description" content="Café, desayunos y buenos ratos. Mira la carta, reserva tu mesa o pide para llevar.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -250,7 +250,7 @@
   <section class="banda banda--cafe banda--llevar" id="llevar" aria-labelledby="t-llevar" data-llevar>
     <div class="wrap contacto">
       <div class="contacto__info">
-        <img class="llevar__ilustracion" src="/img/para-llevar.webp" alt="" width="600" height="670" loading="lazy" decoding="async">
+        <span class="llevar__ilustracion" aria-hidden="true"></span>
         <p class="antetitulo">Para llevar</p>
         <h2 class="titulo-serif" id="t-llevar">Tus favoritos para llevar</h2>
         <p id="llevar-intro">Haz tu pedido aquí y pásate a recogerlo, o te lo llevamos a casa.</p>
@@ -410,7 +410,7 @@
 </footer>
 
 <!-- Ventana: reservar mesa -->
-<dialog class="modal modal--reserva" id="modal-reserva" aria-labelledby="t-reserva">
+<dialog class="modal modal--reserva" id="modal-reserva" data-tema-ventana="beige" aria-labelledby="t-reserva">
   <div class="modal__barra">
     <div>
       <p class="antetitulo">Reservas</p>

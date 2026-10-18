@@ -4,7 +4,19 @@ Web de SOÑO con carta, alérgenos, pedidos para llevar, galería, reservas de m
 
 - **Web pública**: portada, nosotros, carta por grupos (cada producto se abre en grande con sus alérgenos), pedidos para llevar (recoger en el local a la hora elegida, o a domicilio), galería, contacto y reservas en una ventana emergente.
 - **Panel**: se abre tocando el logo SOÑO de la cabecera y ocupa toda la pantalla. Desde ahí se crean, ordenan y borran los grupos de la carta; se cambian precios, productos, alérgenos, fotos, horarios y datos de contacto; se activan o desactivan los pedidos para llevar y la entrega a domicilio, y se ven las reservas, los pedidos (con su hora de recogida) y los mensajes que llegan.
-- **Marca**: logo SOÑO en vector (el café de la Ñ se mueve), colores oficiales (marrón rgb(86, 41, 18) · #562912 y beige rgb(243, 224, 166) · #F3E0A6) y la tipografía Fredoka.
+- **Marca**: logo SOÑO en vector (el café de la Ñ se mueve), colores de la guía de marca y la tipografía Fredoka.
+
+## Temas de color
+
+Desde el panel, pestaña **Ajustes → Aspecto**, se elige un tema para la web y otro para el panel. Son los tres esquemas de la guía de marca:
+
+| Tema | Fondo | Letras | Logo |
+|---|---|---|---|
+| Beige | beige rgb(243, 224, 166) | marrón rgb(86, 41, 18) | marrón |
+| Marrón | marrón rgb(86, 41, 18) | beige | oliva rgb(128, 127, 91) |
+| Lila | lila rgb(201, 173, 255) | marrón | beige |
+
+Las bandas alternas y las ventanas usan el color contrario. La ventana de reservar mesa va al revés que las demás: con los colores de fondo de la web. Los campos de los formularios llevan siempre el color inverso de donde están.
 - **Servidor**: Node.js sin dependencias. Guarda todo en la carpeta de datos (un volumen de Docker).
 
 ## Estructura
