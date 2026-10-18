@@ -365,24 +365,25 @@
     var v = texto(valor);
     if (v) dd.textContent = v; else dd.appendChild(pendiente());
   }
-  /* Redes sociales: Instagram, Pinterest y WhatsApp, con sus iconos */
+  /* Redes sociales y llamada: Instagram, WhatsApp y llamar por teléfono, con sus iconos */
   function enlacesRedes(d) {
     var lista = [];
     var ig = texto(d.instagram).replace(/^@/, '');
     if (ig) lista.push({ id: 'instagram', nombre: 'Instagram', texto: '@' + ig, url: 'https://www.instagram.com/' + encodeURIComponent(ig) + '/' });
-    var pin = texto(d.pinterest).replace(/^@/, '');
-    if (pin) lista.push({ id: 'pinterest', nombre: 'Pinterest', texto: '@' + pin, url: 'https://www.pinterest.es/' + encodeURIComponent(pin) + '/' });
     var wa = texto(d.whatsapp).replace(/[^\d]/g, '');
     if (wa.length === 9) wa = '34' + wa;   // número español sin prefijo
-    if (wa.length >= 9) lista.push({ id: 'whatsapp', nombre: 'WhatsApp', texto: texto(d.whatsapp), url: 'https://wa.me/' + wa });
+    if (wa.length >= 9) lista.push({ id: 'whatsapp', nombre: 'WhatsApp', etiqueta: 'Escribir por WhatsApp a SOÑO', texto: texto(d.whatsapp), url: 'https://wa.me/' + wa });
+    // Llamar: usa el teléfono de contacto
+    var tel = texto(d.telefono).replace(/[^\d+]/g, '');
+    if (/^\d{9}$/.test(tel)) tel = '+34' + tel;
+    if (tel.replace(/\D/g, '').length >= 9) lista.push({ id: 'llamar', nombre: 'Llamar', etiqueta: 'Llamar a SOÑO: ' + texto(d.telefono), texto: texto(d.telefono), url: 'tel:' + tel, mismaVentana: true });
     return lista;
   }
   function enlaceRed(red) {
     var a = el('a', 'enlace-red');
     a.href = red.url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.setAttribute('aria-label', red.nombre + ' de SOÑO');
+    if (!red.mismaVentana) { a.target = '_blank'; a.rel = 'noopener'; }
+    a.setAttribute('aria-label', red.etiqueta || red.nombre + ' de SOÑO');
     a.title = red.nombre;
     var icono = el('span', 'icono-red icono-red--' + red.id);
     icono.setAttribute('aria-hidden', 'true');
@@ -855,7 +856,7 @@
     if (k === 'carta') return { categorias: [], productos: [] };
     if (k === 'galeria') return { fotos: PIES_GALERIA.map(function (pie, i) { return { id: 'g' + (i + 1), pie: pie, foto: null }; }) };
     if (k === 'horario') return { dias: DIAS_SEMANA.map(function (dia) { return { dia: dia, texto: '' }; }), manana: [], tarde: [] };
-    return { direccion: '', email: '', telefono: '', instagram: '', pinterest: '', whatsapp: '', abrimosPronto: true, paraLlevar: true, domicilio: true };
+    return { direccion: '', email: '', telefono: '', instagram: '', whatsapp: '', abrimosPronto: true, paraLlevar: true, domicilio: true };
   }
   function normalizar(k, b) {
     if (k === 'carta' && !Array.isArray(b.productos)) b.productos = [];
@@ -1251,7 +1252,6 @@
     campos.appendChild(campoTexto('adm-email', 'Email', b.email, function (v) { b.email = v; }, { inputmode: 'email', autocomplete: 'off' }));
     campos.appendChild(campoTexto('adm-telefono', 'Teléfono', b.telefono, function (v) { b.telefono = v; }, { inputmode: 'tel', autocomplete: 'off' }));
     campos.appendChild(campoTexto('adm-instagram', 'Instagram', b.instagram, function (v) { b.instagram = v; }, { placeholder: 'usuario', autocomplete: 'off' }));
-    campos.appendChild(campoTexto('adm-pinterest', 'Pinterest', b.pinterest, function (v) { b.pinterest = v; }, { placeholder: 'usuario', autocomplete: 'off' }));
     campos.appendChild(campoTexto('adm-whatsapp', 'WhatsApp', b.whatsapp, function (v) { b.whatsapp = v; }, { placeholder: '600 123 456', inputmode: 'tel', autocomplete: 'off' }));
 
     var casilla = el('label', 'casilla');
