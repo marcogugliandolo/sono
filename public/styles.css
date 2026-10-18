@@ -70,7 +70,7 @@ a { color: inherit; }
 .banda { padding-block: clamp(64px, 9vw, 120px); }
 .banda--amarillo { background: var(--fondo); color: var(--cafe); }
 .banda--cafe { background: var(--cafe); color: var(--amarillo-palido); }
-section[id] { scroll-margin-top: 16px; }
+section[id] { scroll-margin-top: calc(var(--alto-barra, 96px) - 1px); }
 
 .antetitulo {
   font-size: var(--t-xs);
@@ -139,6 +139,20 @@ input:focus-visible + label.boton { outline: 3px solid var(--acento); outline-of
   .boton:not(:disabled):hover { transform: translateY(-2px); }
 }
 
+/* Barra del menú fija arriba; al bajar se hace más compacta y lleva sombra */
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--fondo);
+  color: var(--cafe);
+  transition: box-shadow 0.25s ease;
+}
+.barra.desplazada { box-shadow: 0 8px 24px rgba(40, 18, 6, 0.16); }
+.barra .cabecera { transition: padding 0.25s ease; }
+.barra.desplazada .cabecera { padding-block: 10px; }
+.barra.desplazada .marca .logo { width: 48px; }
+
 /* Cabecera: reservar a la izquierda, logo en el centro, secciones a la derecha */
 .cabecera {
   display: grid;
@@ -162,7 +176,7 @@ input:focus-visible + label.boton { outline: 3px solid var(--acento); outline-of
 }
 /* Logo SOÑO (dibujo vectorial del PDF; toma el color del texto) */
 .logo { display: block; aspect-ratio: 243 / 238; height: auto; overflow: visible; }
-.marca .logo { width: 66px; transition: transform 0.25s ease; }
+.marca .logo { width: 66px; transition: transform 0.25s ease, width 0.25s ease; }
 /* El café de la Ñ se mueve: la superficie ondula y el nivel sube y baja un poco */
 @media (prefers-reduced-motion: no-preference) {
   .logo__ola { animation: logo-ola 2.4s linear infinite; }
@@ -182,14 +196,16 @@ input:focus-visible + label.boton { outline: 3px solid var(--acento); outline-of
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px 22px;
+  gap: 6px 8px;
   list-style: none;
   margin: 0;
   padding: 0;
   font-weight: 600;
   font-size: var(--t-s);
 }
-.menu a { text-decoration: none; padding-block: 4px; border-bottom: 2px solid transparent; }
+.menu a { display: inline-block; text-decoration: none; padding: 5px 11px; border-radius: 999px; transition: background-color 0.2s ease, color 0.2s ease; }
+.menu a:hover { background: var(--amarillo-palido); opacity: 1; }
+.menu a.activo { background: var(--cafe); color: var(--fondo); }
 
 
 /* Portada */
@@ -984,7 +1000,11 @@ input:focus-visible + .icono-chip { outline: 3px solid var(--acento); outline-of
   .marca { justify-self: end; }
   .marca .logo { width: 54px; }
   .menu { grid-column: 1 / -1; justify-self: stretch; border-top: 2px solid var(--cafe); padding-top: 12px; }
-  .menu ul { justify-content: space-between; gap: 6px 14px; }
+  .menu ul { justify-content: space-between; gap: 4px; }
+  .menu a { padding: 5px 9px; }
+  .barra .menu { transition: padding 0.25s ease; }
+  .barra.desplazada .menu { padding-top: 6px; }
+  .barra.desplazada .marca .logo { width: 40px; }
 }
 @media (max-width: 700px) {
   .producto { grid-template-columns: minmax(0, 1fr); }
