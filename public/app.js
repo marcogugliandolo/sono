@@ -535,7 +535,7 @@
       if (p) { total += precioNum(p.precio) * l.cantidad; unidades += l.cantidad; }
     });
     totalPedido.textContent = unidades
-      ? 'Total: ' + euros(total) + ' · ' + (unidades === 1 ? '1 producto' : unidades + ' productos')
+      ? euros(total) + ' · ' + (unidades === 1 ? '1 producto' : unidades + ' productos')
       : 'Elige al menos un producto';
   }
   function agregarAlPedido(id) {
