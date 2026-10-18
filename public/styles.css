@@ -1174,3 +1174,31 @@ input:focus-visible + .alergeno-chip { outline: 3px solid var(--acento); outline
   font-weight: 600;
   font-size: var(--t-s);
 }
+
+/* «Para llevar»: las opciones van en beige y, al elegirlas, en marrón */
+.llevar__pedido .chip { background: var(--fondo); border-color: var(--fondo); color: var(--cafe); }
+.llevar__pedido .chip:hover { background: var(--amarillo-palido); border-color: var(--amarillo-palido); }
+.llevar__pedido input:checked + .chip { background: var(--cafe); border-color: var(--fondo); color: var(--fondo); }
+.llevar__pedido input:focus-visible + .chip { outline-color: var(--fondo); }
+/* …y los campos de texto en claro con la letra marrón */
+.llevar__pedido .campo input,
+.llevar__pedido .campo textarea,
+.llevar__pedido .linea select { background: var(--fondo); border-color: var(--fondo); color: var(--cafe); }
+.llevar__pedido .campo input::placeholder,
+.llevar__pedido .campo textarea::placeholder { color: var(--cafe); opacity: 0.55; }
+.llevar__pedido .campo input:focus-visible,
+.llevar__pedido .campo textarea:focus-visible,
+.llevar__pedido .linea select:focus-visible { outline: 3px solid var(--fondo); outline-offset: 2px; border-color: var(--fondo); }
+
+/* Acceso al panel: fondo claro con el logo y las letras en marrón */
+.modal--login { background: var(--fondo); color: var(--cafe); }
+.modal--login .antetitulo,
+.modal--login .modal__titulo,
+.modal--login .login__logo { color: var(--cafe); }
+.modal--login .modal__cerrar { background: var(--fondo); border-color: var(--cafe); color: var(--cafe); }
+.modal--login .modal__cerrar:hover { background: var(--cafe); color: var(--fondo); }
+.modal--login .campo input { background: var(--amarillo-palido); border-color: var(--cafe); color: var(--cafe); }
+.modal--login .campo input::placeholder { color: var(--cafe); opacity: 0.55; }
+.modal--login .campo input:focus-visible { outline: 3px solid var(--cafe); outline-offset: 2px; border-color: var(--cafe); }
+.modal--login .boton--lleno { background: var(--cafe); border-color: var(--cafe); color: var(--fondo); }
+.modal--login .aviso { color: #A3361A; font-weight: 600; }
