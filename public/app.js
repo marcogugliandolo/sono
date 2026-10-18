@@ -15,6 +15,22 @@
   var CLAVE_DE = { carta: 'carta', fotos: 'galeria', horarios: 'horario', datos: 'datos' };
   var RE_PRECIO = /^\d{1,3}([.,]\d{1,2})?$/;
   var RE_HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
+  var ALERGENOS = [
+    { id: 'gluten', nombre: 'Gluten' },
+    { id: 'crustaceos', nombre: 'Crustáceos' },
+    { id: 'huevos', nombre: 'Huevos' },
+    { id: 'pescado', nombre: 'Pescado' },
+    { id: 'cacahuetes', nombre: 'Cacahuetes' },
+    { id: 'soja', nombre: 'Soja' },
+    { id: 'lacteos', nombre: 'Lácteos' },
+    { id: 'frutos', nombre: 'Frutos de cáscara' },
+    { id: 'apio', nombre: 'Apio' },
+    { id: 'mostaza', nombre: 'Mostaza' },
+    { id: 'sesamo', nombre: 'Sésamo' },
+    { id: 'sulfitos', nombre: 'Sulfitos' },
+    { id: 'altramuces', nombre: 'Altramuces' },
+    { id: 'moluscos', nombre: 'Moluscos' }
+  ];
 
   /* ---------- Estado ---------- */
   var estado = { carta: null, galeria: null, horario: null, datos: null };
@@ -50,6 +66,18 @@
     if (t.indexOf(',') === -1) t += ',00';
     else if (t.split(',')[1].length === 1) t += '0';
     return t + '\u00a0€';
+  }
+  function precioNum(p) { return Number(texto(p).replace(',', '.')) || 0; }
+  function euros(n) { return n.toFixed(2).replace('.', ',') + '\u00a0€'; }
+  function svgAlergeno(id) {
+    var ns = 'http://www.w3.org/2000/svg';
+    var s = document.createElementNS(ns, 'svg');
+    s.setAttribute('viewBox', '0 0 24 24');
+    s.setAttribute('aria-hidden', 'true');
+    var u = document.createElementNS(ns, 'use');
+    u.setAttribute('href', '#al-' + id);
+    s.appendChild(u);
+    return s;
   }
   function productos() {
     return (estado.carta && Array.isArray(estado.carta.productos)) ? estado.carta.productos : [];
@@ -88,6 +116,7 @@
     pintarGaleria();
     pintarHorario();
     pintarDatos();
+    pintarLineas();
   }
 
   /* ---------- Ventanas emergentes ---------- */
@@ -179,6 +208,17 @@
     var ul = $('producto-etiquetas');
     ul.innerHTML = '';
     (Array.isArray(p.etiquetas) ? p.etiquetas : []).forEach(function (t) { ul.appendChild(el('li', null, t)); });
+    var ulAl = $('producto-alergenos');
+    ulAl.innerHTML = '';
+    var lista_al = Array.isArray(p.alergenos) ? p.alergenos : [];
+    if (!lista_al.length) ulAl.appendChild(el('li', 'sin-alergenos', 'Sin alérgenos declarados'));
+    ALERGENOS.forEach(function (a) {
+      if (lista_al.indexOf(a.id) === -1) return;
+      var li = el('li');
+      li.appendChild(svgAlergeno(a.id));
+      li.appendChild(el('span', null, a.nombre));
+      ulAl.appendChild(li);
+    });
     icono.setAttribute('href', '#i-' + (p.icono || 'taza'));
     dibujo.setAttribute('aria-label', 'Ilustración: ' + (p.nombre || 'producto'));
     if (p.foto) {
@@ -194,6 +234,15 @@
       animarEntrada(dibujo);
     }
   }
+  $('producto-llevar').addEventListener('click', function () {
+    var p = productos()[actual];
+    if (!p) return;
+    agregarAlPedido(p.id);
+    cerrar(modalProducto);
+    var seccion = $('llevar');
+    if (seccion && !seccion.hidden) seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    avisoPedido.textContent = '«' + p.nombre + '» añadido a tu pedido.';
+  });
   $('producto-anterior').addEventListener('click', function () { mostrarProducto(actual - 1); });
   $('producto-siguiente').addEventListener('click', function () { mostrarProducto(actual + 1); });
   modalProducto.addEventListener('keydown', function (e) {
@@ -296,6 +345,15 @@
       }
     });
     $('pegatina').hidden = d.abrimosPronto === false;
+    var hayLlevar = d.paraLlevar !== false;
+    var hayDomicilio = d.domicilio !== false;
+    document.querySelectorAll('[data-llevar]').forEach(function (n) { n.hidden = !hayLlevar; });
+    document.querySelectorAll('[data-domicilio]').forEach(function (n) { n.hidden = !hayDomicilio; });
+    if (!hayDomicilio && $('tipo-domicilio').checked) { $('tipo-recoger').checked = true; }
+    $('llevar-intro').textContent = hayDomicilio
+      ? 'Haz tu pedido aquí y pásate a recogerlo, o te lo llevamos a casa.'
+      : 'Haz tu pedido aquí y pásate a recogerlo cuando esté listo.';
+    actualizarTipo();
   }
 
   /* ---------- Reservas ---------- */
@@ -416,6 +474,142 @@
     if (!confirmacion.hidden) reiniciarReserva();
   });
 
+  /* ---------- Pedidos para llevar ---------- */
+  var formPedido = $('form-pedido');
+  var lineasEl = $('pedido-lineas');
+  var totalPedido = $('pedido-total');
+  var avisoPedido = $('aviso-pedido');
+  var confPedido = $('confirmacion-pedido');
+  var botonPedido = formPedido.querySelector('button[type="submit"]');
+  var lineas = [{ id: '', cantidad: 1 }];
+
+  function opcionesProductos(sel, elegido) {
+    sel.innerHTML = '';
+    var vacio = el('option', null, 'Elige un producto');
+    vacio.value = '';
+    sel.appendChild(vacio);
+    CATEGORIAS.forEach(function (cat) {
+      var grupo = document.createElement('optgroup');
+      grupo.label = cat.nombre;
+      productos().forEach(function (p) {
+        if (p.cat !== cat.id) return;
+        var o = el('option', null, p.nombre + ' · ' + precioBonito(p.precio));
+        o.value = p.id;
+        if (p.id === elegido) o.selected = true;
+        grupo.appendChild(o);
+      });
+      if (grupo.children.length) sel.appendChild(grupo);
+    });
+  }
+  function pintarLineas() {
+    lineasEl.innerHTML = '';
+    if (!lineas.length) lineas.push({ id: '', cantidad: 1 });
+    lineas.forEach(function (l, i) {
+      if (l.id && !productos().some(function (p) { return p.id === l.id; })) l.id = '';
+      var fila = el('div', 'linea');
+      var idSel = 'pedido-producto-' + i;
+      var idCant = 'pedido-cantidad-' + i;
+      var lab = el('label', 'solo-lector', 'Producto ' + (i + 1)); lab.htmlFor = idSel;
+      var sel = el('select'); sel.id = idSel;
+      opcionesProductos(sel, l.id);
+      sel.addEventListener('change', function () { l.id = sel.value; avisoPedido.textContent = ''; actualizarTotal(); });
+      var labC = el('label', 'solo-lector', 'Cantidad del producto ' + (i + 1)); labC.htmlFor = idCant;
+      var cant = el('select'); cant.id = idCant;
+      for (var n = 1; n <= 10; n++) { var o = el('option', null, '× ' + n); o.value = String(n); cant.appendChild(o); }
+      cant.value = String(l.cantidad);
+      cant.addEventListener('change', function () { l.cantidad = Number(cant.value); actualizarTotal(); });
+      var quitar = el('button', 'linea__quitar', '×');
+      quitar.type = 'button';
+      quitar.setAttribute('aria-label', 'Quitar el producto ' + (i + 1));
+      quitar.hidden = lineas.length === 1 && !l.id;
+      quitar.addEventListener('click', function () { lineas.splice(i, 1); pintarLineas(); });
+      fila.appendChild(lab); fila.appendChild(sel); fila.appendChild(labC); fila.appendChild(cant); fila.appendChild(quitar);
+      lineasEl.appendChild(fila);
+    });
+    actualizarTotal();
+  }
+  function actualizarTotal() {
+    var total = 0, unidades = 0;
+    lineas.forEach(function (l) {
+      var p = productos().filter(function (x) { return x.id === l.id; })[0];
+      if (p) { total += precioNum(p.precio) * l.cantidad; unidades += l.cantidad; }
+    });
+    totalPedido.textContent = unidades
+      ? 'Total: ' + euros(total) + ' · ' + (unidades === 1 ? '1 producto' : unidades + ' productos')
+      : 'Elige al menos un producto';
+  }
+  function agregarAlPedido(id) {
+    var existente = lineas.filter(function (l) { return l.id === id; })[0];
+    if (existente) existente.cantidad = Math.min(10, existente.cantidad + 1);
+    else {
+      var libre = lineas.filter(function (l) { return !l.id; })[0];
+      if (libre) libre.id = id; else lineas.push({ id: id, cantidad: 1 });
+    }
+    confPedido.hidden = true;
+    formPedido.hidden = false;
+    pintarLineas();
+  }
+  function actualizarTipo() {
+    var domicilio = $('tipo-domicilio').checked;
+    $('campo-direccion').hidden = !domicilio;
+  }
+  formPedido.addEventListener('input', function () { if (!botonPedido.disabled) avisoPedido.textContent = ''; });
+  formPedido.addEventListener('change', function (e) {
+    if (e.target && e.target.name === 'tipo') { avisoPedido.textContent = ''; actualizarTipo(); }
+  });
+  $('pedido-anadir').addEventListener('click', function () {
+    lineas.push({ id: '', cantidad: 1 });
+    pintarLineas();
+    var ultimo = $('pedido-producto-' + (lineas.length - 1));
+    if (ultimo) ultimo.focus();
+  });
+
+  formPedido.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var tipo = $('tipo-domicilio').checked ? 'domicilio' : 'recoger';
+    var nombre = formPedido.nombre.value.trim();
+    var telefono = formPedido.telefono.value.trim();
+    var direccion = formPedido.direccion.value.trim();
+    var elegidas = lineas.filter(function (l) { return l.id; });
+    if (!elegidas.length) { avisoPedido.textContent = 'Elige al menos un producto de la carta.'; return; }
+    if (!nombre) { avisoPedido.textContent = 'Escribe tu nombre para el pedido.'; formPedido.nombre.focus(); return; }
+    if (telefono.replace(/[^\d]/g, '').length < 9) { avisoPedido.textContent = 'Revisa el teléfono: necesitamos al menos 9 cifras para avisarte.'; formPedido.telefono.focus(); return; }
+    if (tipo === 'domicilio' && direccion.length < 5) { avisoPedido.textContent = 'Escribe la dirección de entrega.'; formPedido.direccion.focus(); return; }
+
+    botonPedido.disabled = true;
+    avisoPedido.textContent = 'Enviando el pedido…';
+    api('POST', '/api/pedidos', {
+      tipo: tipo,
+      nombre: nombre,
+      telefono: telefono,
+      direccion: direccion,
+      lineas: elegidas.map(function (l) { return { id: l.id, cantidad: l.cantidad }; }),
+      notas: formPedido.notas.value,
+      web: formPedido.web.value
+    }).then(function (r) {
+      avisoPedido.textContent = '';
+      var resumenLineas = r.lineas.map(function (l) { return l.cantidad + ' × ' + l.nombre; }).join(', ');
+      $('confirmacion-pedido-detalle').textContent = resumenLineas + '. Total: ' + r.total + ' €. ' +
+        (tipo === 'domicilio' ? 'Te lo llevamos a ' + direccion + '.' : 'Te esperamos en SOÑO para recogerlo.');
+      formPedido.hidden = true;
+      confPedido.hidden = false;
+    }).catch(function (err) {
+      avisoPedido.textContent = err.message;
+    }).then(function () {
+      botonPedido.disabled = false;
+    });
+  });
+
+  $('otro-pedido').addEventListener('click', function () {
+    formPedido.reset();
+    lineas = [{ id: '', cantidad: 1 }];
+    avisoPedido.textContent = '';
+    confPedido.hidden = true;
+    formPedido.hidden = false;
+    actualizarTipo();
+    pintarLineas();
+  });
+
   /* ---------- Formulario de contacto ---------- */
   var fc = $('formulario-contacto');
   var avisoContacto = $('aviso');
@@ -497,7 +691,7 @@
     if (k === 'carta') return { productos: [] };
     if (k === 'galeria') return { fotos: PIES_GALERIA.map(function (pie, i) { return { id: 'g' + (i + 1), pie: pie, foto: null }; }) };
     if (k === 'horario') return { dias: DIAS_SEMANA.map(function (dia) { return { dia: dia, texto: '' }; }), manana: [], tarde: [] };
-    return { direccion: '', email: '', telefono: '', instagram: '', abrimosPronto: true };
+    return { direccion: '', email: '', telefono: '', instagram: '', abrimosPronto: true, paraLlevar: true, domicilio: true };
   }
   function normalizar(k, b) {
     if (k === 'carta' && !Array.isArray(b.productos)) b.productos = [];
@@ -510,6 +704,9 @@
       if (!Array.isArray(b.tarde)) b.tarde = [];
     }
     if (k === 'datos' && b.abrimosPronto === undefined) b.abrimosPronto = true;
+    if (k === 'datos' && b.paraLlevar === undefined) b.paraLlevar = true;
+    if (k === 'datos' && b.domicilio === undefined) b.domicilio = true;
+    if (k === 'carta') b.productos.forEach(function (p) { if (!Array.isArray(p.alergenos)) p.alergenos = []; });
     return b;
   }
   function borrador(k) {
@@ -571,6 +768,7 @@
     if (pestana === 'horarios') panelHorarios();
     if (pestana === 'datos') panelDatos();
     if (pestana === 'reservas') panelReservas();
+    if (pestana === 'pedidos') panelPedidos();
     if (pestana === 'mensajes') panelMensajes();
     if (!guardando) mostrarEstado(k && sucio[k] ? 'Hay cambios sin guardar.' : '');
     btnDescartar.disabled = !(k && sucio[k]);
@@ -630,17 +828,17 @@
   /* Pestaña: carta y precios */
   function panelCarta() {
     var b = borrador('carta');
-    cuerpo.appendChild(el('p', 'admin__ayuda', 'Cambia nombres, precios, descripciones y fotos. Los cambios se ven en la web en cuanto pulsas «Guardar cambios».'));
+    cuerpo.appendChild(el('p', 'admin__ayuda', 'Cambia nombres, precios, descripciones, alérgenos y fotos. Los cambios se ven en la web en cuanto pulsas «Guardar cambios». Revisa bien los alérgenos de cada producto: es información que la ley obliga a dar.'));
     CATEGORIAS.forEach(function (cat) {
       var grupo = el('section', 'admin__grupo');
       grupo.appendChild(el('h3', null, cat.nombre));
-      var lista = el('div', 'admin__lista');
+      var lista = el('div', 'admin__lista admin__lista--productos');
       var deCat = b.productos.filter(function (p) { return p.cat === cat.id; });
       if (!deCat.length) lista.appendChild(el('p', 'estado-vacio', 'Sin productos todavía.'));
       deCat.forEach(function (p) { lista.appendChild(tarjetaProducto(b, p)); });
       grupo.appendChild(lista);
       grupo.appendChild(botonMini('+ Añadir producto', function () {
-        var nuevo = { id: 'p' + Date.now().toString(36), cat: cat.id, nombre: '', precio: '', desc: '', icono: cat.icono, etiquetas: [], foto: null };
+        var nuevo = { id: 'p' + Date.now().toString(36), cat: cat.id, nombre: '', precio: '', desc: '', icono: cat.icono, etiquetas: [], alergenos: [], foto: null };
         b.productos.push(nuevo);
         marcar();
         pintarPanel();
@@ -666,6 +864,31 @@
     campos.appendChild(campoTexto('adm-etiq-' + p.id, 'Etiquetas (separadas por comas)', (p.etiquetas || []).join(', '), function (v) {
       p.etiquetas = v.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     }, { placeholder: 'Caliente, Con leche' }));
+
+    var grupoAl = el('fieldset', 'alergenos-admin');
+    grupoAl.appendChild(el('legend', null, 'Alérgenos'));
+    var listaAl = el('div', 'alergenos-admin__lista');
+    ALERGENOS.forEach(function (a) {
+      var idAl = 'adm-al-' + p.id + '-' + a.id;
+      var inp = el('input', 'oculto');
+      inp.type = 'checkbox';
+      inp.id = idAl;
+      inp.checked = (p.alergenos || []).indexOf(a.id) !== -1;
+      inp.addEventListener('change', function () {
+        var actuales = (p.alergenos || []).filter(function (x) { return x !== a.id; });
+        if (inp.checked) actuales.push(a.id);
+        p.alergenos = ALERGENOS.map(function (x) { return x.id; }).filter(function (x) { return actuales.indexOf(x) !== -1; });
+        marcar();
+      });
+      var lab = el('label', 'alergeno-chip');
+      lab.htmlFor = idAl;
+      lab.appendChild(svgAlergeno(a.id));
+      lab.appendChild(el('span', null, a.nombre));
+      listaAl.appendChild(inp);
+      listaAl.appendChild(lab);
+    });
+    grupoAl.appendChild(listaAl);
+    campos.appendChild(grupoAl);
 
     var acc = el('div', 'acciones-mini');
     acc.appendChild(botonFoto('adm-foto-' + p.id, p.foto ? 'Cambiar foto' : 'Subir foto', function (f) {
@@ -759,6 +982,21 @@
     casilla.appendChild(document.createTextNode('Mostrar la pegatina «Abrimos pronto» en la portada'));
     campos.appendChild(casilla);
     cuerpo.appendChild(campos);
+
+    var grupo = el('section', 'admin__grupo');
+    grupo.appendChild(el('h3', null, 'Pedidos para llevar'));
+    var camposLlevar = el('div', 'admin__campos');
+    [['adm-llevar', 'paraLlevar', 'Aceptar pedidos para llevar (muestra la sección en la web)'],
+     ['adm-domicilio', 'domicilio', 'Ofrecer entrega a domicilio']].forEach(function (c) {
+      var lab = el('label', 'casilla');
+      var ch = el('input'); ch.type = 'checkbox'; ch.id = c[0]; ch.checked = b[c[1]] !== false;
+      ch.addEventListener('change', function () { b[c[1]] = ch.checked; marcar(); });
+      lab.appendChild(ch);
+      lab.appendChild(document.createTextNode(c[2]));
+      camposLlevar.appendChild(lab);
+    });
+    grupo.appendChild(camposLlevar);
+    cuerpo.appendChild(grupo);
   }
 
   /* Pestaña: reservas recibidas */
@@ -855,9 +1093,59 @@
     });
   }
 
+  /* Pestaña: pedidos para llevar */
+  var fHora = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  function panelPedidos() {
+    cuerpo.appendChild(el('p', 'admin__ayuda', 'Pedidos para llevar que llegan desde la web, del más nuevo al más antiguo. Bórralos cuando estén entregados. Los de hace más de 30 días se borran solos.'));
+    var cont = el('div', 'registros');
+    cont.appendChild(el('p', 'estado-vacio', 'Cargando pedidos…'));
+    cuerpo.appendChild(cont);
+    api('GET', '/api/pedidos').then(function (r) {
+      if (pestana !== 'pedidos') return;
+      cont.innerHTML = '';
+      ponerContador('pedidos', r.pedidos.length);
+      if (!r.pedidos.length) { cont.appendChild(el('p', 'estado-vacio', 'Todavía no hay pedidos.')); return; }
+      r.pedidos.forEach(function (x) {
+        var t = el('article', 'registro');
+        var cab = el('div', 'registro__cabecera');
+        var titulo = el('p', 'registro__titulo');
+        titulo.appendChild(el('span', 'etiqueta-tipo', x.tipo === 'domicilio' ? 'A domicilio' : 'Para recoger'));
+        titulo.appendChild(document.createTextNode(x.nombre));
+        cab.appendChild(titulo);
+        cab.appendChild(el('p', 'registro__meta', fHora.format(new Date(x.creado))));
+        t.appendChild(cab);
+        var datos = el('p', 'registro__datos');
+        var tel = el('a', null, x.telefono); tel.href = 'tel:' + x.telefono.replace(/[^\d+]/g, ''); datos.appendChild(tel);
+        if (x.direccion) datos.appendChild(el('span', null, x.direccion));
+        t.appendChild(datos);
+        var ul = el('ul', 'registro__lineas');
+        x.lineas.forEach(function (l) {
+          var li = el('li');
+          li.appendChild(el('span', null, l.cantidad + ' × ' + l.nombre));
+          li.appendChild(el('span', null, euros(precioNum(l.precio) * l.cantidad)));
+          ul.appendChild(li);
+        });
+        t.appendChild(ul);
+        t.appendChild(el('p', 'registro__total', 'Total: ' + x.total + '\u00a0€'));
+        if (x.notas) t.appendChild(el('p', 'registro__texto', x.notas));
+        var acc = el('div', 'acciones-mini');
+        acc.appendChild(botonBorrar('Borrar pedido', function () {
+          api('DELETE', '/api/pedidos/' + x.id).then(function () { if (pestana === 'pedidos') pintarPanel(); })
+            .catch(function (err) { if (!sesionCaducada(err)) mostrarEstado(err.message, true); });
+        }));
+        t.appendChild(acc);
+        cont.appendChild(t);
+      });
+    }).catch(function (err) {
+      if (sesionCaducada(err)) return;
+      cont.innerHTML = '';
+      cont.appendChild(el('p', 'estado-vacio', err.message));
+    });
+  }
+
   function ponerContador(pest, n) {
     var tab = $('tab-' + pest);
-    var base = pest === 'reservas' ? 'Reservas' : 'Mensajes';
+    var base = { reservas: 'Reservas', mensajes: 'Mensajes', pedidos: 'Pedidos' }[pest];
     tab.textContent = n ? base + ' (' + n + ')' : base;
   }
   function actualizarContadores() {
@@ -865,6 +1153,7 @@
       ponerContador('reservas', r.reservas.filter(function (x) { return x.fecha >= r.hoy; }).length);
     }).catch(function () {});
     api('GET', '/api/mensajes').then(function (r) { ponerContador('mensajes', r.mensajes.length); }).catch(function () {});
+    api('GET', '/api/pedidos').then(function (r) { ponerContador('pedidos', r.pedidos.length); }).catch(function () {});
   }
 
   /* Validación y guardado */

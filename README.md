@@ -1,9 +1,9 @@
 # SOÑO · web de la cafetería
 
-Web de SOÑO con carta, galería, reservas de mesa, formulario de contacto y un panel para editarlo todo sin tocar código.
+Web de SOÑO con carta, alérgenos, pedidos para llevar, galería, reservas de mesa, formulario de contacto y un panel para editarlo todo sin tocar código.
 
-- **Web pública**: portada, nosotros, carta (cada producto se abre en grande), galería, contacto y reservas en una ventana emergente.
-- **Panel**: se abre tocando el logo SOÑO de la cabecera. Desde ahí se cambian precios, productos, fotos, horarios y datos de contacto, y se ven las reservas y los mensajes que llegan.
+- **Web pública**: portada, nosotros, carta (cada producto se abre en grande con sus alérgenos), pedidos para llevar (recoger en el local o a domicilio), galería, contacto y reservas en una ventana emergente.
+- **Panel**: se abre tocando el logo SOÑO de la cabecera y ocupa toda la pantalla. Desde ahí se cambian precios, productos, alérgenos, fotos, horarios y datos de contacto; se activan o desactivan los pedidos para llevar y la entrega a domicilio, y se ven las reservas, los pedidos y los mensajes que llegan.
 - **Servidor**: Node.js sin dependencias. Guarda todo en la carpeta de datos (un volumen de Docker).
 
 ## Estructura
@@ -79,7 +79,7 @@ Los datos (carta, fotos, reservas) viven en el volumen y no se pierden al actual
 
 ## Copia de seguridad
 
-Todo está en el volumen del stack (Portainer lo llama `sono_sono_datos`): `contenido.json`, `reservas.json`, `mensajes.json` y la carpeta `fotos/`.
+Todo está en el volumen del stack (Portainer lo llama `sono_sono_datos`): `contenido.json`, `reservas.json`, `pedidos.json`, `mensajes.json` y la carpeta `fotos/`.
 
 ```bash
 docker run --rm -v sono_sono_datos:/datos -v "$PWD":/copia alpine \
@@ -92,7 +92,12 @@ docker run --rm -v sono_sono_datos:/datos -v "$PWD":/copia alpine \
 - Tras 5 intentos fallidos desde la misma IP, el acceso se bloquea 15 minutos.
 - La sesión dura 12 horas y la cookie solo la puede leer el servidor.
 - Las fotos se comprueban (solo JPG, PNG o WebP, hasta 10 MB) y el navegador las reduce antes de subirlas.
-- Las reservas y los mensajes tienen límite de envíos por IP y una trampa para bots.
+- Las reservas, los pedidos y los mensajes tienen límite de envíos por IP y una trampa para bots.
+- El total de cada pedido lo calcula el servidor con los precios de la carta, no el navegador.
+
+## Alérgenos
+
+Los 14 alérgenos de declaración obligatoria (Reglamento UE 1169/2011) se marcan en cada producto desde el panel, pestaña **Carta**. Los que trae la carta de ejemplo son orientativos: revisadlos con vuestras recetas y proveedores antes de abrir.
 - Usa una contraseña larga en `ADMIN_PASSWORD`, sobre todo si la web es pública.
 
 ## Tipografías
