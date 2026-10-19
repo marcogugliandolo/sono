@@ -233,7 +233,6 @@
     var vapor = $('ritual-vapor'), sol = $('ritual-sol'), estrellas = $('ritual-estrellas');
     var pasos = document.querySelectorAll('#ritual-pasos li');
     var corazon = $('ritual-corazon'), mlEl = $('ritual-ml');
-    var boton = $('ritual-boton');
     var FONDO = 372, LLENO = 268;   // fondo de la taza y nivel de taza llena
     function tramo(p, a, b) { return Math.min(1, Math.max(0, (p - a) / (b - a))); }
     function suave(t) { return t * t * (3 - 2 * t); }
@@ -285,7 +284,6 @@
         pasos[k].classList.toggle('activo', k === paso);
         pasos[k].classList.toggle('hecho', k < paso);
       }
-      boton.classList.toggle('oculto-suave', p < 0.93);
     }
     var pendiente = false;
     function actualizar() {

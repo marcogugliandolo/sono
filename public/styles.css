@@ -1421,8 +1421,6 @@ input:focus-visible + .zona { outline: 3px solid var(--acento); outline-offset: 
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .ritual__pasos li.activo .ritual__num { background: var(--cafe); border-color: var(--cafe); color: var(--fondo); }
-.ritual__boton { transition: opacity 0.3s ease, transform 0.3s ease; }
-.ritual__boton.oculto-suave { opacity: 0; transform: translateY(6px); pointer-events: none; }
 .ritual__cafe { fill: #825C3B; }
 .ritual__leche { fill: #AC8E63; }
 .ritual__espuma { fill: #E0CA94; }
