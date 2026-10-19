@@ -244,6 +244,68 @@
     </div>
   </section>
 
+  <!-- Así preparamos tu café: animación que avanza con el scroll -->
+  <section class="banda banda--amarillo prep" id="preparacion" aria-labelledby="t-prep">
+    <div class="prep__escenario" id="prep-escenario">
+      <div class="prep__fijo">
+        <div class="wrap prep__contenido">
+          <div class="prep__cabecera">
+            <p class="antetitulo">Recién hecho</p>
+            <h2 class="titulo-serif" id="t-prep">Así preparamos tu café</h2>
+          </div>
+
+          <svg class="prep__dibujo" viewBox="0 0 400 380" role="img" aria-label="Una taza de cristal que se llena de café, después de leche y por último de espuma">
+            <defs>
+              <clipPath id="prep-taza"><path d="M114 215 A86 100 0 0 0 286 215 Z"/></clipPath>
+            </defs>
+            <circle class="prep__sol" cx="200" cy="228" r="122"/>
+            <!-- vapor -->
+            <g id="prep-vapor" opacity="1">
+              <path class="trazo vapor" d="M170 186 C156 162 184 148 170 122 C160 104 176 92 168 78"/>
+              <path class="trazo vapor vapor--b" d="M200 184 C186 156 214 142 200 112 C192 96 204 86 198 74"/>
+              <path class="trazo vapor vapor--c" d="M230 186 C216 162 244 148 230 122 C222 108 232 98 228 88"/>
+            </g>
+            <!-- plato -->
+            <ellipse class="trazo prep__plato" cx="200" cy="330" rx="124" ry="19"/>
+            <ellipse class="trazo" cx="200" cy="330" rx="56" ry="8"/>
+            <!-- líquido dentro de la taza -->
+            <g clip-path="url(#prep-taza)">
+              <rect id="prep-espuma" class="prep__espuma" x="100" y="227" width="200" height="110"/>
+              <rect id="prep-mezcla" class="prep__mezcla" x="100" y="240" width="200" height="110"/>
+              <rect id="prep-cafe" class="prep__cafe" x="100" y="290" width="200" height="60"/>
+              <ellipse id="prep-superficie" class="prep__superficie" cx="200" cy="227" rx="80" ry="9"/>
+              <path id="prep-corazon" class="prep__corazon" d=""/>
+            </g>
+            <!-- chorros -->
+            <path id="prep-chorro-cafe" class="prep__chorro-cafe" d=""/>
+            <g id="prep-chorro-leche">
+              <path class="prep__chorro-borde" d=""/>
+              <path class="prep__chorro-leche" d=""/>
+            </g>
+            <!-- taza de cristal -->
+            <path class="trazo" d="M114 215 A86 100 0 0 0 286 215"/>
+            <ellipse class="trazo" cx="200" cy="215" rx="86" ry="12"/>
+            <path class="trazo" d="M284 236 C334 228 340 292 289 288"/>
+            <path class="prep__brillo" d="M128 236 C128 268 142 292 162 306"/>
+            <!-- cafetera y jarra -->
+            <g id="prep-moka" opacity="0"><path class="trazo" d="M18 10 L62 10 L68 46 L12 46 Z"/><path class="trazo" d="M33 10 L35 4 H45 L47 10"/><path class="trazo" d="M18 13 L5 6 L11 19"/><path class="trazo" d="M12 46 H68 L63 53 H17 Z"/><path class="trazo" d="M17 53 H63 L71 100 H9 Z"/><path class="trazo" d="M66 16 C86 15 88 42 69 43"/><path class="trazo" d="M31 10 L29 46 M49 10 L51 46 M29 53 L25 100 M51 53 L55 100"/><circle class="trazo" cx="58" cy="76" r="3"/></g>
+            <g id="prep-jarra" opacity="0"><path class="trazo" d="M14 14 H58 L62 70 C62 77 57 81 51 81 H21 C15 81 10 77 10 70 Z"/><path class="trazo" d="M14 14 L3 7 L11 24"/><path class="trazo" d="M58 22 C78 22 79 56 61 58"/><path class="trazo" d="M13 34 H59"/></g>
+          </svg>
+
+          <div class="prep__pie">
+            <ol class="prep__pasos" aria-hidden="true">
+              <li><span class="prep__barra"><i id="prep-barra-cafe"></i></span>Café</li>
+              <li><span class="prep__barra"><i id="prep-barra-leche"></i></span>Leche</li>
+              <li><span class="prep__barra"><i id="prep-barra-espuma"></i></span>Espuma</li>
+            </ol>
+            <p class="prep__texto" aria-live="polite"><span id="prep-texto">Tu café con leche, listo</span> <span class="prep__ml" id="prep-ml">250 ml</span></p>
+            <a class="boton boton--lleno boton--peque prep__boton" id="prep-boton" href="#carta">Ver la carta</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="banda banda--amarillo" id="carta" aria-labelledby="t-carta">
     <div class="wrap">
       <div class="carta__cabecera">
