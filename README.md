@@ -109,7 +109,7 @@ El icono de la pestaña (`favicon.ico`, `favicon.svg` y `apple-touch-icon.png`) 
 
 ## «Así nace cada taza»
 
-Justo después de la portada hay una escena que avanza con el scroll, con la estética de la web: una tarjeta marrón con la taza de la portada en línea beige. La cafetera echa el café, la jarra pone la leche y la espuma, y el líquido ondula como el café de la Ñ del logo. Al final sale el corazón en la espuma, el vapor y el sol. A la derecha, los cuatro pasos en filas (el activo marcado) y los mililitros en la tarjeta. Sin vídeos ni librerías.
+Justo después de la portada hay una escena que avanza con el scroll, con la estética de la web: una tarjeta marrón con la taza de la portada en línea beige. La misma cafetera echa el café, la leche y la espuma, y el líquido ondula como el café de la Ñ del logo. Al final sale el corazón en la espuma, el vapor y el sol. A la derecha, los cuatro pasos en filas (el activo marcado) y los mililitros en la tarjeta. Sin vídeos ni librerías.
 
 ## Zonas del local
 
