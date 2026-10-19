@@ -216,6 +216,105 @@
     }
   }
 
+  /* ---------- Así preparamos tu café: la escena avanza con el scroll ---------- */
+  (function () {
+    var escenario = $('prep-escenario');
+    if (!escenario) return;
+    var fijo = escenario.querySelector('.prep__fijo');
+    var e = {
+      cafe: $('prep-cafe'), mezcla: $('prep-mezcla'), espuma: $('prep-espuma'), sup: $('prep-superficie'),
+      corazon: $('prep-corazon'), vapor: $('prep-vapor'), moka: $('prep-moka'), jarra: $('prep-jarra'),
+      chorroCafe: $('prep-chorro-cafe'), chorroLeche: $('prep-chorro-leche'),
+      texto: $('prep-texto'), ml: $('prep-ml'), boton: $('prep-boton'),
+      barras: [$('prep-barra-cafe'), $('prep-barra-leche'), $('prep-barra-espuma')]
+    };
+    var lineasLeche = e.chorroLeche.querySelectorAll('path');
+    var FONDO = 315, BORDE = 215, RX = 86, RY = 100, ALTO_LLENO = 88;   // taza: media elipse
+    function tramo(p, a, b) { return Math.min(1, Math.max(0, (p - a) / (b - a))); }
+    function suave(t) { return t * t * (3 - 2 * t); }
+    function nivel(ml) { return FONDO - ALTO_LLENO * Math.pow(Math.max(0, ml) / 250, 0.62); }
+    function ancho(y) { var k = (y - BORDE) / RY; return RX * Math.sqrt(Math.max(0, 1 - k * k)); }
+    function mezclar(c1, c2, t) {
+      var a = c1.match(/\w\w/g).map(function (h) { return parseInt(h, 16); });
+      var b = c2.match(/\w\w/g).map(function (h) { return parseInt(h, 16); });
+      return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }).join(',') + ')';
+    }
+    // Cafetera y jarra: se colocan con la punta del pico en (x, y) y se inclinan
+    function colocar(g, pico, x, y, giro, opacidad) {
+      g.setAttribute('transform', 'translate(' + x + ' ' + y + ') rotate(' + giro + ') translate(' + (-pico[0]) + ' ' + (-pico[1]) + ')');
+      g.setAttribute('opacity', opacidad);
+    }
+    function chorro(x, y, ySup) {
+      return 'M' + x + ' ' + y + ' C' + (x - 2) + ' ' + (y + 30) + ' 200 ' + (ySup - 40) + ' 200 ' + ySup;
+    }
+
+    function pintar(p) {
+      var mlCafe = 60 * suave(tramo(p, 0.06, 0.30));
+      var mlLeche = 160 * suave(tramo(p, 0.44, 0.70));
+      var mlEspuma = 30 * suave(tramo(p, 0.72, 0.88));
+      var total = mlCafe + mlLeche + mlEspuma;
+      var yCafe = nivel(mlCafe), yMezcla = nivel(mlCafe + mlLeche), yTop = nivel(total);
+      var t = tramo(p, 0.44, 0.70);
+      e.cafe.setAttribute('y', yCafe);
+      e.cafe.style.fill = mezclar('562912', '7A4A2A', t);
+      e.mezcla.setAttribute('y', mlLeche > 0.5 ? yMezcla : 400);
+      e.espuma.setAttribute('y', mlEspuma > 0.5 ? yTop : 400);
+      var arriba = mlEspuma > 0.5 ? 'F9EED3' : mlLeche > 0.5 ? 'C99A6C' : '7A3D1C';
+      var w = ancho(yTop);
+      e.sup.setAttribute('cy', yTop);
+      e.sup.setAttribute('rx', total > 0.5 ? w : 0);
+      e.sup.setAttribute('ry', total > 0.5 ? w * 0.12 : 0);
+      e.sup.style.fill = '#' + arriba;
+      // Corazón de latte art y vapor al final
+      var fin = suave(tramo(p, 0.9, 0.98));
+      var r = 15;
+      e.corazon.setAttribute('d', 'M200 ' + (yTop + r * 0.35) + ' C' + (200 - r * 1.3) + ' ' + (yTop - r * 0.1) + ' ' + (200 - r * 0.7) + ' ' + (yTop - r * 0.55) + ' 200 ' + (yTop - r * 0.25) +
+        ' C' + (200 + r * 0.7) + ' ' + (yTop - r * 0.55) + ' ' + (200 + r * 1.3) + ' ' + (yTop - r * 0.1) + ' 200 ' + (yTop + r * 0.35) + ' Z');
+      e.corazon.setAttribute('opacity', fin);
+      e.vapor.setAttribute('opacity', fin);
+
+      // Cafetera: entra, se inclina, echa el café y se va
+      var mEntra = suave(tramo(p, 0, 0.06)), mSale = suave(tramo(p, 0.30, 0.38));
+      var mGiro = -10 - 42 * suave(tramo(p, 0.02, 0.07)) + 40 * mSale;
+      colocar(e.moka, [5, 6], 214 + 40 * (1 - mEntra) + 60 * mSale, 118 - 30 * (1 - mEntra) - 50 * mSale, mGiro, Math.min(mEntra, 1 - mSale));
+      var cayendo = p > 0.06 && p < 0.30;
+      e.chorroCafe.setAttribute('d', cayendo ? chorro(206, 112, yTop) : '');
+
+      // Jarra de leche: entra, echa la leche y la espuma, y se va
+      var jEntra = suave(tramo(p, 0.38, 0.44)), jSale = suave(tramo(p, 0.88, 0.93));
+      var jGiro = -8 - 40 * suave(tramo(p, 0.40, 0.45)) + 38 * jSale;
+      colocar(e.jarra, [3, 7], 212 + 40 * (1 - jEntra) + 60 * jSale, 116 - 30 * (1 - jEntra) - 50 * jSale, jGiro, Math.min(jEntra, 1 - jSale));
+      var leche = p > 0.44 && p < 0.88;
+      var grosor = p > 0.71 ? 0.6 : 1;
+      lineasLeche[0].setAttribute('d', leche ? chorro(205, 110, yTop) : '');
+      lineasLeche[1].setAttribute('d', leche ? chorro(205, 110, yTop) : '');
+      lineasLeche[0].style.strokeWidth = 6 * grosor;
+      lineasLeche[1].style.strokeWidth = 3.2 * grosor;
+
+      // Barras de pasos, texto y mililitros
+      e.barras[0].style.setProperty('--p', tramo(p, 0.06, 0.30));
+      e.barras[1].style.setProperty('--p', tramo(p, 0.44, 0.70));
+      e.barras[2].style.setProperty('--p', tramo(p, 0.72, 0.88));
+      var frase = p < 0.38 ? 'Primero, el café recién hecho' : p < 0.71 ? 'Después, leche cremosa' : p < 0.9 ? 'Y una capa fina de espuma' : 'Tu café con leche, listo';
+      if (e.texto.textContent !== frase) e.texto.textContent = frase;
+      e.ml.textContent = Math.round(total) + ' ml';
+      e.boton.classList.toggle('oculto-suave', p < 0.93);
+    }
+
+    var pendiente = false;
+    function actualizar() {
+      pendiente = false;
+      var caja = escenario.getBoundingClientRect();
+      var recorrido = caja.height - fijo.offsetHeight;
+      var p = recorrido > 0 ? Math.min(1, Math.max(0, (raiz.style.getPropertyValue('--alto-barra') ? parseFloat(raiz.style.getPropertyValue('--alto-barra')) : 0) - caja.top) / recorrido) : 1;
+      pintar(p);
+    }
+    function pedir() { if (!pendiente) { pendiente = true; requestAnimationFrame(actualizar); } }
+    window.addEventListener('scroll', pedir, { passive: true });
+    window.addEventListener('resize', pedir);
+    actualizar();
+  })();
+
   var modalReserva = $('modal-reserva');
   var modalProducto = $('modal-producto');
   var modalLogin = $('modal-login');

@@ -107,6 +107,10 @@ Fredoka, la misma letra redondeada del logo, alojada en `public/fuentes` con su 
 
 El icono de la pestaña (`favicon.ico`, `favicon.svg` y `apple-touch-icon.png`) es el logo.
 
+## «Así preparamos tu café»
+
+Entre «Nosotros» y «La carta» hay una escena que avanza con el scroll: la cafetera echa el café en la taza, después la jarra pone la leche y la espuma, y termina con el corazón y el vapor. Abajo se ven los tres pasos (café, leche, espuma) y los mililitros. Está dibujada en línea con los colores de la web, sin vídeos ni librerías.
+
 ## Zonas del local
 
 Al reservar mesa se puede elegir zona en un mini plano: interior, zona de lectura, terraza o «donde haya sitio». En **Ajustes → Zonas para reservar** se renombran, se añaden (hasta 6, con dibujo de mesas, terraza, lectura o barra) y se desactivan. La zona elegida aparece en cada reserva del panel.

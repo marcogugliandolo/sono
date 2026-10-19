@@ -1343,3 +1343,57 @@ input:focus-visible + .zona { outline: 3px solid var(--acento); outline-offset: 
   .zona-admin { grid-template-columns: minmax(0, 1fr); align-items: start; }
   .zona-admin .casilla, .zona-admin .boton { padding-bottom: 0; margin-bottom: 0; justify-self: start; }
 }
+
+/* ---------- Así preparamos tu café (avanza con el scroll) ---------- */
+.prep { padding-block: 0; }
+.prep__escenario { position: relative; height: 320vh; }
+.prep__fijo {
+  position: sticky;
+  top: var(--alto-barra, 80px);
+  height: calc(100vh - var(--alto-barra, 80px));
+  height: calc(100svh - var(--alto-barra, 80px));
+  display: grid;
+  align-items: center;
+}
+.prep__contenido { display: grid; justify-items: center; gap: clamp(8px, 2vh, 20px); text-align: center; }
+.prep__cabecera { display: grid; gap: 10px; justify-items: center; }
+.prep__dibujo {
+  width: min(100%, 580px);
+  height: auto;
+  max-height: 58vh;
+  overflow: visible;
+  color: var(--cafe);
+  --grosor: 2.4;
+}
+.prep__sol { fill: #FAF1D6; }
+.prep__plato { fill: #FAF1D6; }
+.prep__cafe { fill: var(--cafe); }
+.prep__mezcla { fill: #B07B4F; }
+.prep__espuma { fill: #F6E7C1; }
+.prep__superficie { fill: #F9EED3; }
+.prep__corazon { fill: #B07B4F; }
+.prep__brillo { fill: none; stroke: #FFFFFF; stroke-width: 3; stroke-linecap: round; opacity: 0.55; }
+.prep__chorro-cafe { fill: none; stroke: var(--cafe); stroke-width: 4; stroke-linecap: round; }
+.prep__chorro-borde { fill: none; stroke: var(--cafe); stroke-width: 6; stroke-linecap: round; }
+.prep__chorro-leche { fill: none; stroke: #FBF6EA; stroke-width: 3.2; stroke-linecap: round; }
+#prep-moka path, #prep-moka circle, #prep-jarra path { fill: #FAF1D6; }
+#prep-moka .trazo, #prep-jarra .trazo { --grosor: 2.2; }
+
+.prep__pie { display: grid; justify-items: center; gap: 12px; width: min(100%, 520px); }
+.prep__pasos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; list-style: none; margin: 0; padding: 0; }
+.prep__pasos li { display: grid; gap: 8px; font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.prep__barra { display: block; height: 4px; border-radius: 2px; background: var(--linea-sobre-amarillo); opacity: 0.6; overflow: hidden; }
+.prep__barra i { display: block; height: 100%; width: 100%; background: var(--cafe); transform-origin: left center; transform: scaleX(var(--p, 1)); }
+.prep__pasos li:has(i) .prep__barra { opacity: 1; }
+.prep__texto { font-size: var(--t-m); font-weight: 600; min-height: 1.6em; }
+.prep__ml { font-variant-numeric: tabular-nums; font-weight: 700; opacity: 0.7; margin-left: 6px; }
+.prep__boton { transition: opacity 0.3s ease, transform 0.3s ease; }
+.prep__boton.oculto-suave { opacity: 0; transform: translateY(6px); pointer-events: none; }
+/* Separación con la carta, que también es beige */
+.prep + #carta { padding-top: 0; }
+.prep + #carta > .wrap { border-top: 2px solid var(--cafe); padding-top: clamp(48px, 7vw, 96px); }
+#carta { scroll-margin-top: calc(var(--alto-barra, 96px) - 1px); }
+@media (max-width: 760px) {
+  .prep__escenario { height: 280vh; }
+  .prep__dibujo { max-height: 44vh; }
+}
