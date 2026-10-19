@@ -229,7 +229,7 @@
     if (!ritual) return;
     var fijo = ritual.querySelector('.ritual__fijo');
     var capas = { cafe: $('ritual-cafe'), leche: $('ritual-leche'), espuma: $('ritual-espuma') };
-    var moka = $('ritual-moka'), jarra = $('ritual-jarra'), chorroEl = $('ritual-chorro');
+    var moka = $('ritual-moka'), chorroEl = $('ritual-chorro');
     var vapor = $('ritual-vapor'), sol = $('ritual-sol'), estrellas = $('ritual-estrellas');
     var pasos = document.querySelectorAll('#ritual-pasos li');
     var corazon = $('ritual-corazon'), mlEl = $('ritual-ml');
@@ -258,14 +258,12 @@
       capas.leche.setAttribute('d', fLeche > 0.002 ? ola(yLeche) : '');
       capas.espuma.setAttribute('d', fEspuma > 0.002 ? ola(yTop) : '');
 
-      // Cafetera: entra, se inclina, echa el café y se va
-      var mE = suave(tramo(p, 0, 0.06)), mS = suave(tramo(p, 0.30, 0.38));
+      // La misma cafetera en todo: entra, echa el café, se endereza un momento,
+      // vuelve a inclinarse para la leche y la espuma, y al final se va
+      var mE = suave(tramo(p, 0, 0.06)), mS = suave(tramo(p, 0.88, 0.95));
+      var inclinada = suave(tramo(p, 0.02, 0.07)) - suave(tramo(p, 0.30, 0.36)) + suave(tramo(p, 0.39, 0.44));
       colocar(moka, [5, 6], 212 + 50 * (1 - mE) + 70 * mS, 150 - 40 * (1 - mE) - 60 * mS,
-        -10 - 44 * suave(tramo(p, 0.02, 0.07)) + 44 * mS, Math.min(mE, 1 - mS));
-      // Jarra: entra, echa la leche y la espuma, y se va
-      var jE = suave(tramo(p, 0.38, 0.44)), jS = suave(tramo(p, 0.88, 0.93));
-      colocar(jarra, [3, 7], 210 + 50 * (1 - jE) + 70 * jS, 150 - 40 * (1 - jE) - 60 * jS,
-        -8 - 42 * suave(tramo(p, 0.40, 0.45)) + 42 * jS, Math.min(jE, 1 - jS));
+        -10 - 44 * inclinada + 44 * mS, Math.min(mE, 1 - mS));
       var cayendo = (p > 0.06 && p < 0.30) || (p > 0.44 && p < 0.88);
       chorroEl.setAttribute('d', cayendo ? 'M205 146 C203 180 200 ' + (yTop - 40) + ' 200 ' + yTop : '');
       chorroEl.style.strokeWidth = p > 0.71 ? 2.5 : 4;
