@@ -223,6 +223,70 @@
   </div>
 </header>
 
+  <!-- Paso a paso: al bajar, la cafetera y la jarra llenan la taza (como el café de la Ñ del logo) -->
+  <section class="banda banda--amarillo ritual-banda" id="paso-a-paso" aria-labelledby="t-ritual">
+    <div class="ritual" id="ritual">
+      <div class="ritual__fijo">
+        <div class="wrap ritual__contenido">
+          <div class="ritual__lamina">
+          <svg class="ritual__dibujo" viewBox="0 0 400 440" role="img" aria-label="La taza de SOÑO se llena de café, leche y espuma; al final sale el vapor y amanece">
+              <defs>
+                <clipPath id="ritual-taza"><path d="M96 262 C130 278 270 278 304 262 C304 330 268 372 200 372 C132 372 96 330 96 262 Z"/></clipPath>
+              </defs>
+              <!-- cielo: estrellas al principio, sol al final -->
+              <g id="ritual-estrellas">
+                <use class="titila" href="#i-estrella" x="70" y="80" width="22" height="22"/>
+                <use class="titila titila--b" href="#i-estrella" x="318" y="64" width="16" height="16"/>
+                <use class="titila titila--c" href="#i-estrella" x="120" y="30" width="12" height="12"/>
+              </g>
+              <g id="ritual-sol" opacity="0"><g class="sol-gira"><use href="#i-sol" x="262" y="20" width="110" height="110"/></g></g>
+              <!-- vapor -->
+              <g id="ritual-vapor" opacity="0">
+                <path class="trazo vapor" d="M160 236 C142 208 178 190 160 162 C144 138 172 120 158 96"/>
+                <path class="trazo vapor vapor--b" d="M200 236 C184 204 218 186 200 150"/>
+                <path class="trazo vapor vapor--c" d="M240 236 C222 208 258 190 240 162 C230 148 236 138 232 130"/>
+              </g>
+              <!-- líquido dentro de la taza, con la superficie ondulando -->
+              <g clip-path="url(#ritual-taza)">
+                <g class="ritual__ola">
+                  <path id="ritual-espuma" class="ritual__espuma" d="M20 400 q 10 -3 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 V 400 H 20 Z"/>
+                  <path id="ritual-leche" class="ritual__leche" d="M20 400 q 10 -3 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 V 400 H 20 Z"/>
+                  <path id="ritual-cafe" class="ritual__cafe" d="M20 400 q 10 -3 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 V 400 H 20 Z"/>
+                </g>
+              </g>
+              <path id="ritual-corazon" class="ritual__corazon" d="" opacity="0"/>
+              <!-- chorros -->
+              <path id="ritual-chorro" class="ritual__chorro" d=""/>
+              <!-- taza (la misma de la portada) -->
+              <path class="trazo" d="M48 384 C120 356 280 356 352 384 C280 412 120 412 48 384 Z"/>
+              <path class="trazo" d="M96 262 C130 278 270 278 304 262 C304 330 268 372 200 372 C132 372 96 330 96 262 Z"/>
+              <path class="trazo" d="M96 262 C130 246 270 246 304 262"/>
+              <path class="trazo" d="M302 284 C346 276 356 320 326 338 C314 345 298 344 288 338"/>
+              <!-- cafetera y jarra -->
+              <g id="ritual-moka" class="ritual__utensilio" opacity="0"><path class="trazo" d="M18 10 L62 10 L68 46 L12 46 Z"/><path class="trazo" d="M33 10 L35 4 H45 L47 10"/><path class="trazo" d="M18 13 L5 6 L11 19"/><path class="trazo" d="M12 46 H68 L63 53 H17 Z"/><path class="trazo" d="M17 53 H63 L71 100 H9 Z"/><path class="trazo" d="M66 16 C86 15 88 42 69 43"/><path class="trazo" d="M31 10 L29 46 M49 10 L51 46 M29 53 L25 100 M51 53 L55 100"/></g>
+              <g id="ritual-jarra" class="ritual__utensilio" opacity="0"><path class="trazo" d="M14 14 H58 L62 70 C62 77 57 81 51 81 H21 C15 81 10 77 10 70 Z"/><path class="trazo" d="M14 14 L3 7 L11 24"/><path class="trazo" d="M58 22 C78 22 79 56 61 58"/></g>
+            </svg>
+            <p class="ritual__ml" aria-hidden="true"><span id="ritual-ml">0</span> ml</p>
+          </div>
+
+          <div class="ritual__texto">
+            <p class="antetitulo">Paso a paso</p>
+            <h2 class="titulo-serif ritual__titulo" id="t-ritual">Así nace cada taza</h2>
+            <ol class="ritual__pasos" id="ritual-pasos">
+              <li><span class="ritual__num">01</span><strong>El café</strong><span>Recién hecho, a fuego lento</span></li>
+              <li><span class="ritual__num">02</span><strong>La leche</strong><span>Cremosa y templada</span></li>
+              <li><span class="ritual__num">03</span><strong>La espuma</strong><span>Una capa fina, como una nube</span></li>
+              <li><span class="ritual__num">04</span><strong>Tu taza</strong><span>Para disfrutar sin prisa</span></li>
+            </ol>
+            <a class="boton boton--lleno boton--peque ritual__boton" id="ritual-boton" href="#carta">Ver la carta</a>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </section>
+
 <main>
   <section class="banda banda--cafe" id="nosotros" aria-labelledby="t-nosotros">
     <div class="wrap nosotros">
@@ -242,68 +306,7 @@
         <p>Del café recién hecho a la repostería casera, todo en SOÑO está pensado para crear momentos que merece la pena saborear sin prisa.</p>
       </div>
     </div>
-  </section>
 
-  <!-- Así preparamos tu café: animación que avanza con el scroll -->
-  <section class="banda banda--amarillo prep" id="preparacion" aria-labelledby="t-prep">
-    <div class="prep__escenario" id="prep-escenario">
-      <div class="prep__fijo">
-        <div class="wrap prep__contenido">
-          <div class="prep__cabecera">
-            <p class="antetitulo">Recién hecho</p>
-            <h2 class="titulo-serif" id="t-prep">Así preparamos tu café</h2>
-          </div>
-
-          <svg class="prep__dibujo" viewBox="0 0 400 380" role="img" aria-label="Una taza de cristal que se llena de café, después de leche y por último de espuma">
-            <defs>
-              <clipPath id="prep-taza"><path d="M114 215 A86 100 0 0 0 286 215 Z"/></clipPath>
-            </defs>
-            <circle class="prep__sol" cx="200" cy="228" r="122"/>
-            <!-- vapor -->
-            <g id="prep-vapor" opacity="1">
-              <path class="trazo vapor" d="M170 186 C156 162 184 148 170 122 C160 104 176 92 168 78"/>
-              <path class="trazo vapor vapor--b" d="M200 184 C186 156 214 142 200 112 C192 96 204 86 198 74"/>
-              <path class="trazo vapor vapor--c" d="M230 186 C216 162 244 148 230 122 C222 108 232 98 228 88"/>
-            </g>
-            <!-- plato -->
-            <ellipse class="trazo prep__plato" cx="200" cy="330" rx="124" ry="19"/>
-            <ellipse class="trazo" cx="200" cy="330" rx="56" ry="8"/>
-            <!-- líquido dentro de la taza -->
-            <g clip-path="url(#prep-taza)">
-              <rect id="prep-espuma" class="prep__espuma" x="100" y="227" width="200" height="110"/>
-              <rect id="prep-mezcla" class="prep__mezcla" x="100" y="240" width="200" height="110"/>
-              <rect id="prep-cafe" class="prep__cafe" x="100" y="290" width="200" height="60"/>
-              <ellipse id="prep-superficie" class="prep__superficie" cx="200" cy="227" rx="80" ry="9"/>
-              <path id="prep-corazon" class="prep__corazon" d=""/>
-            </g>
-            <!-- chorros -->
-            <path id="prep-chorro-cafe" class="prep__chorro-cafe" d=""/>
-            <g id="prep-chorro-leche">
-              <path class="prep__chorro-borde" d=""/>
-              <path class="prep__chorro-leche" d=""/>
-            </g>
-            <!-- taza de cristal -->
-            <path class="trazo" d="M114 215 A86 100 0 0 0 286 215"/>
-            <ellipse class="trazo" cx="200" cy="215" rx="86" ry="12"/>
-            <path class="trazo" d="M284 236 C334 228 340 292 289 288"/>
-            <path class="prep__brillo" d="M128 236 C128 268 142 292 162 306"/>
-            <!-- cafetera y jarra -->
-            <g id="prep-moka" opacity="0"><path class="trazo" d="M18 10 L62 10 L68 46 L12 46 Z"/><path class="trazo" d="M33 10 L35 4 H45 L47 10"/><path class="trazo" d="M18 13 L5 6 L11 19"/><path class="trazo" d="M12 46 H68 L63 53 H17 Z"/><path class="trazo" d="M17 53 H63 L71 100 H9 Z"/><path class="trazo" d="M66 16 C86 15 88 42 69 43"/><path class="trazo" d="M31 10 L29 46 M49 10 L51 46 M29 53 L25 100 M51 53 L55 100"/><circle class="trazo" cx="58" cy="76" r="3"/></g>
-            <g id="prep-jarra" opacity="0"><path class="trazo" d="M14 14 H58 L62 70 C62 77 57 81 51 81 H21 C15 81 10 77 10 70 Z"/><path class="trazo" d="M14 14 L3 7 L11 24"/><path class="trazo" d="M58 22 C78 22 79 56 61 58"/><path class="trazo" d="M13 34 H59"/></g>
-          </svg>
-
-          <div class="prep__pie">
-            <ol class="prep__pasos" aria-hidden="true">
-              <li><span class="prep__barra"><i id="prep-barra-cafe"></i></span>Café</li>
-              <li><span class="prep__barra"><i id="prep-barra-leche"></i></span>Leche</li>
-              <li><span class="prep__barra"><i id="prep-barra-espuma"></i></span>Espuma</li>
-            </ol>
-            <p class="prep__texto" aria-live="polite"><span id="prep-texto">Tu café con leche, listo</span> <span class="prep__ml" id="prep-ml">250 ml</span></p>
-            <a class="boton boton--lleno boton--peque prep__boton" id="prep-boton" href="#carta">Ver la carta</a>
-          </div>
-        </div>
-      </div>
-    </div>
   </section>
 
   <section class="banda banda--amarillo" id="carta" aria-labelledby="t-carta">

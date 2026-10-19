@@ -149,6 +149,7 @@ input:focus-visible + label.boton { outline: 3px solid var(--acento); outline-of
   transition: box-shadow 0.25s ease;
 }
 .barra.desplazada { box-shadow: 0 8px 24px rgba(40, 18, 6, 0.16); }
+.barra.sin-transicion, .barra.sin-transicion * { transition: none !important; }
 .barra .cabecera { transition: padding 0.25s ease; }
 .barra.desplazada .cabecera { padding-block: 10px; }
 .barra.desplazada .marca .logo { width: 48px; }
@@ -1344,10 +1345,20 @@ input:focus-visible + .zona { outline: 3px solid var(--acento); outline-offset: 
   .zona-admin .casilla, .zona-admin .boton { padding-bottom: 0; margin-bottom: 0; justify-self: start; }
 }
 
-/* ---------- Así preparamos tu café (avanza con el scroll) ---------- */
-.prep { padding-block: 0; }
-.prep__escenario { position: relative; height: 320vh; }
-.prep__fijo {
+
+
+/* ---------- Paso a paso (tras la portada): la taza se llena con el scroll ---------- */
+/* Misma estética que la portada: fondo beige, tarjeta marrón con dibujo de línea beige */
+.ritual-banda { padding-block: 0; }
+.ritual-banda::before {   /* línea de separación con la portada, al ancho del contenido */
+  content: "";
+  display: block;
+  width: min(100% - 32px, 1148px);
+  margin-inline: auto;
+  border-top: 2px solid var(--cafe);
+}
+.ritual { position: relative; height: 320vh; }
+.ritual__fijo {
   position: sticky;
   top: var(--alto-barra, 80px);
   height: calc(100vh - var(--alto-barra, 80px));
@@ -1355,45 +1366,85 @@ input:focus-visible + .zona { outline: 3px solid var(--acento); outline-offset: 
   display: grid;
   align-items: center;
 }
-.prep__contenido { display: grid; justify-items: center; gap: clamp(8px, 2vh, 20px); text-align: center; }
-.prep__cabecera { display: grid; gap: 10px; justify-items: center; }
-.prep__dibujo {
-  width: min(100%, 580px);
-  height: auto;
-  max-height: 58vh;
-  overflow: visible;
-  color: var(--cafe);
-  --grosor: 2.4;
+.ritual__contenido {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: center;
+  width: 100%;
 }
-.prep__sol { fill: #FAF1D6; }
-.prep__plato { fill: #FAF1D6; }
-.prep__cafe { fill: var(--cafe); }
-.prep__mezcla { fill: #B07B4F; }
-.prep__espuma { fill: #F6E7C1; }
-.prep__superficie { fill: #F9EED3; }
-.prep__corazon { fill: #B07B4F; }
-.prep__brillo { fill: none; stroke: #FFFFFF; stroke-width: 3; stroke-linecap: round; opacity: 0.55; }
-.prep__chorro-cafe { fill: none; stroke: var(--cafe); stroke-width: 4; stroke-linecap: round; }
-.prep__chorro-borde { fill: none; stroke: var(--cafe); stroke-width: 6; stroke-linecap: round; }
-.prep__chorro-leche { fill: none; stroke: #FBF6EA; stroke-width: 3.2; stroke-linecap: round; }
-#prep-moka path, #prep-moka circle, #prep-jarra path { fill: #FAF1D6; }
-#prep-moka .trazo, #prep-jarra .trazo { --grosor: 2.2; }
-
-.prep__pie { display: grid; justify-items: center; gap: 12px; width: min(100%, 520px); }
-.prep__pasos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; list-style: none; margin: 0; padding: 0; }
-.prep__pasos li { display: grid; gap: 8px; font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
-.prep__barra { display: block; height: 4px; border-radius: 2px; background: var(--linea-sobre-amarillo); opacity: 0.6; overflow: hidden; }
-.prep__barra i { display: block; height: 100%; width: 100%; background: var(--cafe); transform-origin: left center; transform: scaleX(var(--p, 1)); }
-.prep__pasos li:has(i) .prep__barra { opacity: 1; }
-.prep__texto { font-size: var(--t-m); font-weight: 600; min-height: 1.6em; }
-.prep__ml { font-variant-numeric: tabular-nums; font-weight: 700; opacity: 0.7; margin-left: 6px; }
-.prep__boton { transition: opacity 0.3s ease, transform 0.3s ease; }
-.prep__boton.oculto-suave { opacity: 0; transform: translateY(6px); pointer-events: none; }
-/* Separación con la carta, que también es beige */
-.prep + #carta { padding-top: 0; }
-.prep + #carta > .wrap { border-top: 2px solid var(--cafe); padding-top: clamp(48px, 7vw, 96px); }
-#carta { scroll-margin-top: calc(var(--alto-barra, 96px) - 1px); }
-@media (max-width: 760px) {
-  .prep__escenario { height: 280vh; }
-  .prep__dibujo { max-height: 44vh; }
+.ritual__lamina {
+  position: relative;
+  background: var(--cafe);
+  color: var(--acento);
+  border-radius: var(--radio);
+  padding: 4% 6% 2%;
+  display: grid;
+  place-items: center;
+  max-height: calc(100svh - var(--alto-barra, 80px) - 48px);
+}
+.ritual__dibujo { width: 100%; height: auto; max-height: calc(100svh - var(--alto-barra, 80px) - 96px); --grosor: 3; overflow: visible; }
+.ritual__ml {
+  position: absolute;
+  left: 22px;
+  bottom: 18px;
+  padding: 4px 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ritual__texto { display: grid; gap: 18px; justify-items: start; }
+.ritual__pasos { list-style: none; margin: 6px 0 0; padding: 0; width: 100%; display: grid; }
+.ritual__pasos li {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 14px;
+  padding-block: 14px;
+  border-top: 2px solid var(--cafe);
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+.ritual__pasos li:last-child { border-bottom: 2px solid var(--cafe); }
+.ritual__pasos li span:last-child { justify-self: end; text-align: right; font-size: var(--t-s); }
+.ritual__pasos li.hecho { opacity: 0.7; }
+.ritual__pasos li.activo { opacity: 1; }
+.ritual__num {
+  display: inline-grid;
+  place-items: center;
+  min-width: 36px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.ritual__pasos li.activo .ritual__num { background: var(--cafe); border-color: var(--cafe); color: var(--fondo); }
+.ritual__boton { transition: opacity 0.3s ease, transform 0.3s ease; }
+.ritual__boton.oculto-suave { opacity: 0; transform: translateY(6px); pointer-events: none; }
+.ritual__cafe { fill: #825C3B; }
+.ritual__leche { fill: #AC8E63; }
+.ritual__espuma { fill: #E0CA94; }
+.ritual__corazon { fill: #AC8E63; }
+.ritual__chorro { fill: none; stroke: var(--acento); stroke-width: 4; stroke-linecap: round; }
+.ritual__utensilio path { fill: var(--cafe); }
+.ritual__utensilio .trazo { --grosor: 2.6; }
+@media (prefers-reduced-motion: no-preference) {
+  .ritual__ola { animation: ritual-ola 2.8s linear infinite; }
+}
+@keyframes ritual-ola { to { transform: translateX(-40px); } }
+@media (max-width: 860px) {
+  .ritual { height: 290vh; }
+  .ritual__contenido { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .ritual__lamina { max-height: 40svh; padding: 3% 8% 1%; }
+  .ritual__dibujo { max-height: calc(40svh - 16px); }
+  .ritual__ml { left: 14px; bottom: 12px; }
+  .ritual__texto { gap: 8px; }
+  .ritual__titulo { font-size: 1.6rem; }
+  .ritual__pasos li { padding-block: 8px; gap: 4px 10px; }
 }
