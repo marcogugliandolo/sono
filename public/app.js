@@ -184,11 +184,18 @@
 
   /* ---------- Barra del menú fija ---------- */
   var barra = $('barra');
-  function medirBarra() { raiz.style.setProperty('--alto-barra', barra.offsetHeight + 'px'); }
+  // Se mide la barra en su versión compacta, que es la que se ve al estar más abajo
+  function medirBarra() {
+    var estaba = barra.classList.contains('desplazada');
+    barra.classList.add('sin-transicion', 'desplazada');
+    raiz.style.setProperty('--alto-barra', barra.offsetHeight + 'px');
+    if (!estaba) barra.classList.remove('desplazada');
+    void barra.offsetHeight;
+    barra.classList.remove('sin-transicion');
+  }
   function marcarBarra() {
-    var antes = barra.classList.contains('desplazada');
     var ahora = window.scrollY > 8;
-    if (antes !== ahora) { barra.classList.toggle('desplazada', ahora); setTimeout(medirBarra, 300); }
+    if (barra.classList.contains('desplazada') !== ahora) barra.classList.toggle('desplazada', ahora);
   }
   window.addEventListener('scroll', marcarBarra, { passive: true });
   window.addEventListener('resize', medirBarra);
@@ -216,98 +223,79 @@
     }
   }
 
-  /* ---------- Así preparamos tu café: la escena avanza con el scroll ---------- */
+  /* ---------- Paso a paso (tras la portada): la taza se llena con el scroll ---------- */
   (function () {
-    var escenario = $('prep-escenario');
-    if (!escenario) return;
-    var fijo = escenario.querySelector('.prep__fijo');
-    var e = {
-      cafe: $('prep-cafe'), mezcla: $('prep-mezcla'), espuma: $('prep-espuma'), sup: $('prep-superficie'),
-      corazon: $('prep-corazon'), vapor: $('prep-vapor'), moka: $('prep-moka'), jarra: $('prep-jarra'),
-      chorroCafe: $('prep-chorro-cafe'), chorroLeche: $('prep-chorro-leche'),
-      texto: $('prep-texto'), ml: $('prep-ml'), boton: $('prep-boton'),
-      barras: [$('prep-barra-cafe'), $('prep-barra-leche'), $('prep-barra-espuma')]
-    };
-    var lineasLeche = e.chorroLeche.querySelectorAll('path');
-    var FONDO = 315, BORDE = 215, RX = 86, RY = 100, ALTO_LLENO = 88;   // taza: media elipse
+    var ritual = $('ritual');
+    if (!ritual) return;
+    var fijo = ritual.querySelector('.ritual__fijo');
+    var capas = { cafe: $('ritual-cafe'), leche: $('ritual-leche'), espuma: $('ritual-espuma') };
+    var moka = $('ritual-moka'), jarra = $('ritual-jarra'), chorroEl = $('ritual-chorro');
+    var vapor = $('ritual-vapor'), sol = $('ritual-sol'), estrellas = $('ritual-estrellas');
+    var pasos = document.querySelectorAll('#ritual-pasos li');
+    var corazon = $('ritual-corazon'), mlEl = $('ritual-ml');
+    var boton = $('ritual-boton');
+    var FONDO = 372, LLENO = 268;   // fondo de la taza y nivel de taza llena
     function tramo(p, a, b) { return Math.min(1, Math.max(0, (p - a) / (b - a))); }
     function suave(t) { return t * t * (3 - 2 * t); }
-    function nivel(ml) { return FONDO - ALTO_LLENO * Math.pow(Math.max(0, ml) / 250, 0.62); }
-    function ancho(y) { var k = (y - BORDE) / RY; return RX * Math.sqrt(Math.max(0, 1 - k * k)); }
-    function mezclar(c1, c2, t) {
-      var a = c1.match(/\w\w/g).map(function (h) { return parseInt(h, 16); });
-      var b = c2.match(/\w\w/g).map(function (h) { return parseInt(h, 16); });
-      return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }).join(',') + ')';
+    function nivel(f) { return FONDO - (FONDO - LLENO) * Math.pow(Math.max(0, f), 0.7); }
+    // Superficie ondulada (como el café de la Ñ del logo); el grupo se desplaza para que ondee
+    function ola(y) {
+      if (y >= FONDO) return '';
+      var d = 'M20 ' + y + ' q 10 -3 20 0';
+      for (var x = 40; x < 460; x += 20) d += ' t 20 0';
+      return d + ' V 400 H 20 Z';
     }
-    // Cafetera y jarra: se colocan con la punta del pico en (x, y) y se inclinan
     function colocar(g, pico, x, y, giro, opacidad) {
       g.setAttribute('transform', 'translate(' + x + ' ' + y + ') rotate(' + giro + ') translate(' + (-pico[0]) + ' ' + (-pico[1]) + ')');
       g.setAttribute('opacity', opacidad);
     }
-    function chorro(x, y, ySup) {
-      return 'M' + x + ' ' + y + ' C' + (x - 2) + ' ' + (y + 30) + ' 200 ' + (ySup - 40) + ' 200 ' + ySup;
-    }
-
     function pintar(p) {
-      var mlCafe = 60 * suave(tramo(p, 0.06, 0.30));
-      var mlLeche = 160 * suave(tramo(p, 0.44, 0.70));
-      var mlEspuma = 30 * suave(tramo(p, 0.72, 0.88));
-      var total = mlCafe + mlLeche + mlEspuma;
-      var yCafe = nivel(mlCafe), yMezcla = nivel(mlCafe + mlLeche), yTop = nivel(total);
-      var t = tramo(p, 0.44, 0.70);
-      e.cafe.setAttribute('y', yCafe);
-      e.cafe.style.fill = mezclar('562912', '7A4A2A', t);
-      e.mezcla.setAttribute('y', mlLeche > 0.5 ? yMezcla : 400);
-      e.espuma.setAttribute('y', mlEspuma > 0.5 ? yTop : 400);
-      var arriba = mlEspuma > 0.5 ? 'F9EED3' : mlLeche > 0.5 ? 'C99A6C' : '7A3D1C';
-      var w = ancho(yTop);
-      e.sup.setAttribute('cy', yTop);
-      e.sup.setAttribute('rx', total > 0.5 ? w : 0);
-      e.sup.setAttribute('ry', total > 0.5 ? w * 0.12 : 0);
-      e.sup.style.fill = '#' + arriba;
-      // Corazón de latte art y vapor al final
-      var fin = suave(tramo(p, 0.9, 0.98));
-      var r = 15;
-      e.corazon.setAttribute('d', 'M200 ' + (yTop + r * 0.35) + ' C' + (200 - r * 1.3) + ' ' + (yTop - r * 0.1) + ' ' + (200 - r * 0.7) + ' ' + (yTop - r * 0.55) + ' 200 ' + (yTop - r * 0.25) +
-        ' C' + (200 + r * 0.7) + ' ' + (yTop - r * 0.55) + ' ' + (200 + r * 1.3) + ' ' + (yTop - r * 0.1) + ' 200 ' + (yTop + r * 0.35) + ' Z');
-      e.corazon.setAttribute('opacity', fin);
-      e.vapor.setAttribute('opacity', fin);
+      var fCafe = 0.24 * suave(tramo(p, 0.06, 0.30));
+      var fLeche = 0.64 * suave(tramo(p, 0.44, 0.70));
+      var fEspuma = 0.12 * suave(tramo(p, 0.72, 0.88));
+      var yCafe = nivel(fCafe), yLeche = nivel(fCafe + fLeche), yTop = nivel(fCafe + fLeche + fEspuma);
+      capas.cafe.setAttribute('d', ola(yCafe));
+      capas.leche.setAttribute('d', fLeche > 0.002 ? ola(yLeche) : '');
+      capas.espuma.setAttribute('d', fEspuma > 0.002 ? ola(yTop) : '');
 
       // Cafetera: entra, se inclina, echa el café y se va
-      var mEntra = suave(tramo(p, 0, 0.06)), mSale = suave(tramo(p, 0.30, 0.38));
-      var mGiro = -10 - 42 * suave(tramo(p, 0.02, 0.07)) + 40 * mSale;
-      colocar(e.moka, [5, 6], 214 + 40 * (1 - mEntra) + 60 * mSale, 118 - 30 * (1 - mEntra) - 50 * mSale, mGiro, Math.min(mEntra, 1 - mSale));
-      var cayendo = p > 0.06 && p < 0.30;
-      e.chorroCafe.setAttribute('d', cayendo ? chorro(206, 112, yTop) : '');
+      var mE = suave(tramo(p, 0, 0.06)), mS = suave(tramo(p, 0.30, 0.38));
+      colocar(moka, [5, 6], 212 + 50 * (1 - mE) + 70 * mS, 150 - 40 * (1 - mE) - 60 * mS,
+        -10 - 44 * suave(tramo(p, 0.02, 0.07)) + 44 * mS, Math.min(mE, 1 - mS));
+      // Jarra: entra, echa la leche y la espuma, y se va
+      var jE = suave(tramo(p, 0.38, 0.44)), jS = suave(tramo(p, 0.88, 0.93));
+      colocar(jarra, [3, 7], 210 + 50 * (1 - jE) + 70 * jS, 150 - 40 * (1 - jE) - 60 * jS,
+        -8 - 42 * suave(tramo(p, 0.40, 0.45)) + 42 * jS, Math.min(jE, 1 - jS));
+      var cayendo = (p > 0.06 && p < 0.30) || (p > 0.44 && p < 0.88);
+      chorroEl.setAttribute('d', cayendo ? 'M205 146 C203 180 200 ' + (yTop - 40) + ' 200 ' + yTop : '');
+      chorroEl.style.strokeWidth = p > 0.71 ? 2.5 : 4;
 
-      // Jarra de leche: entra, echa la leche y la espuma, y se va
-      var jEntra = suave(tramo(p, 0.38, 0.44)), jSale = suave(tramo(p, 0.88, 0.93));
-      var jGiro = -8 - 40 * suave(tramo(p, 0.40, 0.45)) + 38 * jSale;
-      colocar(e.jarra, [3, 7], 212 + 40 * (1 - jEntra) + 60 * jSale, 116 - 30 * (1 - jEntra) - 50 * jSale, jGiro, Math.min(jEntra, 1 - jSale));
-      var leche = p > 0.44 && p < 0.88;
-      var grosor = p > 0.71 ? 0.6 : 1;
-      lineasLeche[0].setAttribute('d', leche ? chorro(205, 110, yTop) : '');
-      lineasLeche[1].setAttribute('d', leche ? chorro(205, 110, yTop) : '');
-      lineasLeche[0].style.strokeWidth = 6 * grosor;
-      lineasLeche[1].style.strokeWidth = 3.2 * grosor;
+      // Final: vapor y amanece (las estrellas se apagan y sale el sol)
+      var fin = suave(tramo(p, 0.88, 0.98));
+      // Corazón en la espuma, en perspectiva
+      var c = 22;
+      corazon.setAttribute('d', 'M200 ' + (yTop + c * 0.32) + ' C' + (200 - c * 1.4) + ' ' + (yTop - c * 0.05) + ' ' + (200 - c * 0.75) + ' ' + (yTop - c * 0.5) + ' 200 ' + (yTop - c * 0.2) +
+        ' C' + (200 + c * 0.75) + ' ' + (yTop - c * 0.5) + ' ' + (200 + c * 1.4) + ' ' + (yTop - c * 0.05) + ' 200 ' + (yTop + c * 0.32) + ' Z');
+      corazon.setAttribute('opacity', fin);
+      mlEl.textContent = Math.round(250 * (fCafe + fLeche + fEspuma));
+      vapor.setAttribute('opacity', fin);
+      sol.setAttribute('opacity', fin);
+      estrellas.setAttribute('opacity', 1 - 0.7 * fin);
 
-      // Barras de pasos, texto y mililitros
-      e.barras[0].style.setProperty('--p', tramo(p, 0.06, 0.30));
-      e.barras[1].style.setProperty('--p', tramo(p, 0.44, 0.70));
-      e.barras[2].style.setProperty('--p', tramo(p, 0.72, 0.88));
-      var frase = p < 0.38 ? 'Primero, el café recién hecho' : p < 0.71 ? 'Después, leche cremosa' : p < 0.9 ? 'Y una capa fina de espuma' : 'Tu café con leche, listo';
-      if (e.texto.textContent !== frase) e.texto.textContent = frase;
-      e.ml.textContent = Math.round(total) + ' ml';
-      e.boton.classList.toggle('oculto-suave', p < 0.93);
+      var paso = p < 0.38 ? 0 : p < 0.71 ? 1 : p < 0.9 ? 2 : 3;
+      for (var k = 0; k < pasos.length; k++) {
+        pasos[k].classList.toggle('activo', k === paso);
+        pasos[k].classList.toggle('hecho', k < paso);
+      }
+      boton.classList.toggle('oculto-suave', p < 0.93);
     }
-
     var pendiente = false;
     function actualizar() {
       pendiente = false;
-      var caja = escenario.getBoundingClientRect();
+      var caja = ritual.getBoundingClientRect();
+      var arriba = parseFloat(getComputedStyle(fijo).top) || 0;
       var recorrido = caja.height - fijo.offsetHeight;
-      var p = recorrido > 0 ? Math.min(1, Math.max(0, (raiz.style.getPropertyValue('--alto-barra') ? parseFloat(raiz.style.getPropertyValue('--alto-barra')) : 0) - caja.top) / recorrido) : 1;
-      pintar(p);
+      pintar(recorrido > 0 ? Math.min(1, Math.max(0, (arriba - caja.top) / recorrido)) : 1);
     }
     function pedir() { if (!pendiente) { pendiente = true; requestAnimationFrame(actualizar); } }
     window.addEventListener('scroll', pedir, { passive: true });
