@@ -210,7 +210,7 @@ input:focus-visible + label.boton { outline: 3px solid var(--acento); outline-of
 
 
 /* Portada */
-.portada { padding-top: 0; }
+.portada { padding-top: 0; padding-bottom: clamp(20px, 3vw, 40px); }
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
@@ -1350,13 +1350,9 @@ input:focus-visible + .zona { outline: 3px solid var(--acento); outline-offset: 
 /* ---------- Paso a paso (tras la portada): la taza se llena con el scroll ---------- */
 /* Misma estética que la portada: fondo beige, tarjeta marrón con dibujo de línea beige */
 .ritual-banda { padding-block: 0; }
-.ritual-banda::before {   /* línea de separación con la portada, al ancho del contenido */
-  content: "";
-  display: block;
-  width: min(100% - 32px, 1148px);
-  margin-inline: auto;
-  border-top: 2px solid var(--cafe);
-}
+/* Separación entre la portada y «Paso a paso»: onda de café entre dos estrellas */
+.separa-onda { display: grid; place-items: center; margin-top: clamp(56px, 8vw, 96px); }
+.separa-onda svg { width: 170px; height: auto; color: var(--cafe); --grosor: 2.5; overflow: visible; }
 .ritual { position: relative; height: 320vh; }
 .ritual__fijo {
   position: sticky;
